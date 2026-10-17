@@ -1,0 +1,31 @@
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "litforge"
+version = "0.1.0"
+description = "An explainable decoder-only transformer trained from scratch on Shakespeare."
+requires-python = ">=3.11,<3.14"
+dependencies = ["torch==2.8.0", "numpy>=1.26,<3", "fastapi>=0.115,<1", "uvicorn>=0.34,<1"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<10", "httpx>=0.28,<1", "ruff>=0.14,<1"]
+plots = ["matplotlib>=3.8,<4"]
+
+[project.scripts]
+litforge = "litforge.cli:main"
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]

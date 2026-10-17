@@ -1,0 +1,101 @@
+{
+  "device": "cpu",
+  "machine": "x86_64",
+  "system": "Linux",
+  "torch_version": "2.8.0+cpu",
+  "threads": 2,
+  "checkpoint_sha256": "a03f9a494660f1ecf9df34daf8ea7275b4b59a27b850f0f16c895acf3de33970",
+  "parameters": 1816896,
+  "context_characters": 128,
+  "repeats": 7,
+  "warmup_generations_per_path": 2,
+  "seed": 42,
+  "generation": [
+    {
+      "case": "short passage",
+      "prompt_characters": 7,
+      "new_characters": 80,
+      "reference_seconds": 0.1407999920002112,
+      "cached_seconds": 0.0632179310000538,
+      "speedup": 2.2272160726059096,
+      "reference_samples_seconds": [
+        0.17119538799988732,
+        0.1375264509997578,
+        0.1407999920002112,
+        0.1425650409996706,
+        0.14676242999985334,
+        0.1405444179999904,
+        0.13796603599985247
+      ],
+      "cached_samples_seconds": [
+        0.0652355140000509,
+        0.06113788300035594,
+        0.0632179310000538,
+        0.062152791999778856,
+        0.06413305300020511,
+        0.06720737600016946,
+        0.06256726299989168
+      ]
+    },
+    {
+      "case": "crosses context limit",
+      "prompt_characters": 7,
+      "new_characters": 200,
+      "reference_seconds": 0.5085224360000211,
+      "cached_seconds": 0.3514298420000159,
+      "speedup": 1.4470098302010392,
+      "reference_samples_seconds": [
+        0.5106013350000467,
+        0.5957717880000928,
+        0.5085224360000211,
+        0.4999808990000929,
+        0.5003989570000158,
+        0.4918140170002516,
+        0.5275731040001119
+      ],
+      "cached_samples_seconds": [
+        0.3512717309999971,
+        0.3632107060002454,
+        0.4481065889999627,
+        0.3514298420000159,
+        0.3502957890000289,
+        0.37018059899992295,
+        0.3375572029999603
+      ]
+    },
+    {
+      "case": "full context",
+      "prompt_characters": 128,
+      "new_characters": 80,
+      "reference_seconds": 0.24962988800007224,
+      "cached_seconds": 0.25142509700026494,
+      "speedup": 0.9928598655360534,
+      "reference_samples_seconds": [
+        0.24962988800007224,
+        0.24304632900020806,
+        0.24561249199996382,
+        0.24949310900001365,
+        0.255186723999941,
+        0.2515916509996714,
+        0.2592528529999072
+      ],
+      "cached_samples_seconds": [
+        0.2474060389999977,
+        0.25142509700026494,
+        0.24842776099967523,
+        0.26533244399979594,
+        0.2527211050000915,
+        0.2534653590000744,
+        0.24832289400001173
+      ]
+    }
+  ],
+  "batch_loading": {
+    "batch_size": 16,
+    "context": 128,
+    "iterations_per_repeat": 1000,
+    "original_microseconds": 182.7051099999153,
+    "vectorized_microseconds": 21.503525999833073,
+    "speedup": 8.496518664024382
+  }
+}
