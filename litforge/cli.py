@@ -19,6 +19,20 @@ def main():
         "prepare", help="Download and checksum-verify public-domain training text"
     )
     prep.add_argument("--data", default="data/shakespeare")
+    books = commands.add_parser(
+        "prepare-books",
+        help="Download five verified public-domain books with whole-book splits",
+    )
+    books.add_argument("--data", default="data/novels")
+    study = commands.add_parser(
+        "study", help="Run or resume the preregistered, multi-seed book experiment"
+    )
+    study.add_argument("--plan", default="experiments/novels.json")
+    study.add_argument("--data", default="data/novels")
+    study.add_argument("--output", default="runs/novel-study-v1")
+    study.add_argument("--phase", choices=["all", "train", "evaluate"], default="all")
+    study.add_argument("--architecture", choices=["transformer", "gru"])
+    study.add_argument("--seed", type=int)
     training = commands.add_parser(
         "train", help="Train a randomly initialized transformer"
     )
@@ -71,6 +85,22 @@ def main():
             torch.set_num_threads(args.threads)
         if args.command == "prepare":
             print(json.dumps(prepare(Path(args.data)), indent=2))
+        elif args.command == "prepare-books":
+            from .books import prepare_books
+
+            print(json.dumps(prepare_books(args.data), indent=2))
+        elif args.command == "study":
+            from .study import run_study
+
+            result = run_study(
+                args.plan,
+                args.data,
+                args.output,
+                args.phase,
+                args.architecture,
+                args.seed,
+            )
+            print(json.dumps(result.get("aggregate", result), indent=2))
         elif args.command == "train":
             train(args)
         elif args.command == "evaluate":

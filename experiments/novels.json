@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "name": "novel-generalization-v1",
+  "question": "How do nearly parameter-matched Transformer and GRU models generalize to an unseen Austen book under the same training-byte budget?",
+  "seeds": [17, 42, 73],
+  "steps": 1200,
+  "batch_size": 16,
+  "learning_rate": 0.001,
+  "eval_every": 300,
+  "threads": 2,
+  "models": {
+    "transformer": {"vocab_size": 256, "context": 128, "width": 112, "heads": 4, "layers": 2, "dropout": 0.1},
+    "gru": {"vocab_size": 256, "context": 128, "width": 160, "layers": 2, "dropout": 0.1}
+  },
+  "context_probe": {"lengths": [8, 32, 128], "anchors": 256},
+  "demo_seed": 42,
+  "selection": "lowest full-book validation bits per byte; no test-based seed or hyperparameter selection",
+  "budget_note": "matched training bytes and approximately matched parameter count; FLOPs and wall time are not matched",
+  "baselines": {"ngram_order": 4, "backoff_strength": 10.0, "unigram_alpha": 0.1}
+}

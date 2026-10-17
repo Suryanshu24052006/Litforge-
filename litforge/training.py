@@ -2,6 +2,7 @@
 
 import json
 import math
+import tempfile
 import time
 from dataclasses import asdict
 from pathlib import Path
@@ -9,16 +10,32 @@ from pathlib import Path
 import torch
 
 from .data import batch, load_data
-from .model import LanguageModel, ModelConfig
-from .tokenizer import CharTokenizer
+from .model import LanguageModel, ModelConfig, build_model
+from .tokenizer import ByteTokenizer, CharTokenizer
 
 
 def write_json(path, value):
-    path.write_text(json.dumps(value, indent=2, allow_nan=False) + "\n")
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    text = json.dumps(value, indent=2, allow_nan=False) + "\n"
+    with tempfile.NamedTemporaryFile(
+        mode="w",
+        encoding="utf-8",
+        dir=path.parent,
+        prefix="." + path.name,
+        suffix=".tmp",
+        delete=False,
+    ) as stream:
+        stream.write(text)
+        temporary = Path(stream.name)
+    try:
+        temporary.replace(path)
+    finally:
+        temporary.unlink(missing_ok=True)
 
 
 @torch.inference_mode()
-def evaluate(model, tokens, batch_size=16):
+def evaluate(model, tokens, batch_size=16, unit="character"):
     """Score each target once in nonoverlapping windows; include the short tail."""
     was_training = model.training
     model.eval()
@@ -53,9 +70,9 @@ def evaluate(model, tokens, batch_size=16):
         raise ValueError("Evaluation split needs at least two tokens")
     nll = total_nll / count
     return {
-        "loss_nats_per_character": nll,
-        "perplexity_per_character": math.exp(nll),
-        "bits_per_character": nll / math.log(2),
+        f"loss_nats_per_{unit}": nll,
+        f"perplexity_per_{unit}": math.exp(nll),
+        f"bits_per_{unit}": nll / math.log(2),
         "targets_scored": count,
     }
 
@@ -80,6 +97,15 @@ def save_checkpoint(path, model, tokenizer, corpus_sha256, step, validation):
 def load_checkpoint(path, device="cpu"):
     # weights_only avoids arbitrary Python object deserialization.
     checkpoint = torch.load(path, map_location="cpu", weights_only=True)
+    if checkpoint.get("format_version") == 2:
+        if (
+            checkpoint["tokenizer"] != {"kind": "utf8-byte", "vocab_size": 256}
+            or checkpoint["model_config"]["vocab_size"] != 256
+        ):
+            raise ValueError("Byte checkpoint vocabulary or tokenizer is inconsistent")
+        model = build_model(checkpoint["architecture"], checkpoint["model_config"])
+        model.load_state_dict(checkpoint["state_dict"], strict=True)
+        return model.to(device).eval(), ByteTokenizer(), checkpoint
     if checkpoint.get("format_version") != 1:
         raise ValueError("Unsupported checkpoint version")
     tokenizer = CharTokenizer(checkpoint["vocabulary"])
