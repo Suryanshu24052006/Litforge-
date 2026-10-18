@@ -17,7 +17,7 @@
     "new_bytes": 240,
     "word_metric": "fraction of generated ASCII words of two or more letters seen in training books; spelling proxy only, not coherence or writing quality"
   },
-  "generation_source_sha256": "5afa0fa15ac085a014362a629a99ba1b5e8791ca3b202f818960f5f847658ea7",
+  "generation_source_sha256": "f40615985844f020a06515c3d564b5a0e85ef77d8f0bf8539bdc74e61d73aa4a",
   "models": {
     "original": {
       "checkpoint_sha256": "dff9dd3ca18d56d91a15551dfc7032965dcac70c1315a9b0b3eea465c72654fd",

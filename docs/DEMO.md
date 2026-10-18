@@ -9,7 +9,7 @@ This is a separate, single-seed attempt to improve the generated text. The origi
 
 The last column counts complete ASCII words of two or more letters that also occur in the training books. It excludes a possibly cut-off final word. This is a spelling proxy: real words can still form incoherent sentences. Raw word counts, replacement-character counts, and checkpoint hashes are in the [comparison record](../artifacts/demo/comparison.json). No test book is read here. Validation has already guided development, so this is not a new independent test result.
 
-All fixed prompts and sampling seeds are declared in the [plan](../experiments/extended-demo.json). Both models use the same generation settings. Samples below are unedited; none were selected for fluency.
+All fixed prompts and sampling seeds are declared in the [plan](../experiments/extended-demo.json). Both models use the same generation settings. No sample was selected for fluency. Only line-end spaces are trimmed for display here; the comparison JSON preserves the exact output.
 
 ## Prompt: It was a quiet evening, and · sampling seed 42
 
@@ -19,7 +19,7 @@ All fixed prompts and sampling seeds are declared in the [plan](../experiments/e
 It was a quiet evening, and being all that be
 fore mor to you was con the of him not the simite to arrraie of the was
 the be to of his the for them of and on of he cand for for she live her could
-and in prie the she pertion suprt the was his dents. 
+and in prie the she pertion suprt the was his dents.
 
 Mrs. Pirrf. Nonll
 ```
@@ -63,7 +63,7 @@ so
 She looked at him and said, but and to all and
 her more pose wer acon the of him not the simite to arrraie of the was
 the be to of his the for them of and on of he cand for for she live her could
-and in prie the she pertion suprt the was his dents. 
+and in prie the she pertion suprt the was his dents.
 
 Mrs. Pirrf. Nonll
 ```
@@ -107,7 +107,7 @@ that with her sist
 The next morning, befir all that and
 her mor to you was compened thing ther the imite to arrraie of the was
 the be to of his the for them of and on of he cand for for she live her could
-and in prie the she pertion suprt the was his dents. 
+and in prie the she pertion suprt the was his dents.
 
 Mrs. Pirrf. Nonll
 ```
@@ -176,7 +176,7 @@ was out sure all she had to caivourate tall was of he mastion.
 
 She had Mr. She Mars. But the tisted seep presion indister, and not of with and to he
 reardied of to of her she she withe exelly the her be the with
-fore to 
+fore to
 ```
 
 ### extended

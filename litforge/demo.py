@@ -170,7 +170,7 @@ def render_demo_report(comparison, path):
         "",
         "The last column counts complete ASCII words of two or more letters that also occur in the training books. It excludes a possibly cut-off final word. This is a spelling proxy: real words can still form incoherent sentences. Raw word counts, replacement-character counts, and checkpoint hashes are in the [comparison record](../artifacts/demo/comparison.json). No test book is read here. Validation has already guided development, so this is not a new independent test result.",
         "",
-        "All fixed prompts and sampling seeds are declared in the [plan](../experiments/extended-demo.json). Both models use the same generation settings. Samples below are unedited; none were selected for fluency.",
+        "All fixed prompts and sampling seeds are declared in the [plan](../experiments/extended-demo.json). Both models use the same generation settings. No sample was selected for fluency. Only line-end spaces are trimmed for display here; the comparison JSON preserves the exact output.",
         "",
     ]
     for sample in comparison["samples"]:
@@ -183,7 +183,10 @@ def render_demo_report(comparison, path):
                 f"### {name}",
                 "",
                 "```text",
-                sample["outputs"][name]["text"],
+                "\n".join(
+                    line.rstrip(" \t")
+                    for line in sample["outputs"][name]["text"].split("\n")
+                ),
                 "```",
                 "",
             ]
