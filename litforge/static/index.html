@@ -16,7 +16,7 @@
     <main>
       <section class="hero">
         <div class="eyebrow">TRAINED ON AUSTEN · RUNS ON CPU</div>
-        <h1>Compare two small text-generation models.</h1>
+        <h1>Compare small text-generation models.</h1>
         <p>
           A Transformer and a GRU learned from the same sampled passages. See
           their test results, give them an opening to continue, and inspect
@@ -33,6 +33,7 @@
         </button>
       </nav>
       <section id="results" role="tabpanel">
+        <div id="extended-note" class="card notice" hidden></div>
         <div class="grid" id="score-cards">
           <div class="card empty">Loading the measured results…</div>
         </div>
@@ -122,22 +123,24 @@
               <label for="writer-model">Model</label
               ><select id="writer-model" class="model-select">
                 <option value="primary">Transformer</option>
-                <option value="gru">GRU</option></select
-              ><label for="prompt">Opening</label
+                <option value="gru">GRU</option>
+              </select>
+              <p id="writer-model-note" class="subtle"></p>
+              <label for="prompt">Opening</label
               ><textarea id="prompt" required maxlength="512">
 It was a quiet evening, and </textarea
               >
               <div class="controls">
                 <div>
                   <label for="temperature"
-                    >Temperature <span id="temperature-value">0.8</span></label
+                    >Temperature <span id="temperature-value">0.7</span></label
                   ><input
                     type="range"
                     id="temperature"
                     min="0.2"
                     max="1.4"
                     step="0.1"
-                    value="0.8"
+                    value="0.7"
                   />
                 </div>
                 <div>

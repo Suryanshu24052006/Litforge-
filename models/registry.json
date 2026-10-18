@@ -24,6 +24,18 @@
       "dataset_sha256": "fd6403e1d1d186ba495713d95dcffa583ff249911e2b28b01da56f99b1b447bc",
       "validation_bpb": 2.541121792111681,
       "test_bpb": 2.4971446368319588
+    },
+    "extended": {
+      "path": "models/extended-transformer.pt",
+      "sha256": "e4fc3c7b6c2e22827ff5788f377743579517537f9c725dd7d592c258e1d80f47",
+      "bytes": 1396777,
+      "parameters": 347200,
+      "seed": 42,
+      "selected_step": 16000,
+      "dataset_sha256": "fd6403e1d1d186ba495713d95dcffa583ff249911e2b28b01da56f99b1b447bc",
+      "protocol_sha256": "fed68ae2019198b45d3d19f4e9f3a9a42686a2b5732ae7750348bc2786b1aeba",
+      "validation_bpb": 1.987911540737931,
+      "purpose": "longer-trained demo; outside original matched-budget study"
     }
   }
 }

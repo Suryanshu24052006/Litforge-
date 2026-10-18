@@ -16,7 +16,17 @@ const screenshotRoot = process.env.LITFORGE_SCREENSHOTS;
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto(url, { waitUntil: "networkidle" });
-  await page.getByText("2 models ready · CPU").waitFor();
+  const health = await (
+    await page.request.get(new URL("/health", url).href)
+  ).json();
+  await page.getByText(health.models.length + " models ready · CPU").waitFor();
+  const modelIds = health.models.map((model) => model.id);
+  assert.ok(modelIds.includes("primary") && modelIds.includes("gru"));
+  if (modelIds.includes("extended")) {
+    assert.equal(health.default_model, "extended");
+    assert.equal(await page.locator("#writer-model").inputValue(), "extended");
+    assert.equal(await page.locator("#extended-note").isVisible(), true);
+  }
   assert.equal(await page.locator("#score-cards .card").count(), 2);
   assert.equal(await page.locator("#baselines tbody tr").count(), 4);
   assert.equal(await page.locator("#splits li").count(), 5);
@@ -27,7 +37,7 @@ const screenshotRoot = process.env.LITFORGE_SCREENSHOTS;
     });
   await page.getByRole("tab", { name: "Try the models" }).click();
   await page.locator("#length").selectOption("100");
-  for (const name of ["primary", "gru"]) {
+  for (const name of modelIds) {
     await page.locator("#writer-model").selectOption(name);
     await page.locator("#prompt").fill("A café — <script>alert(1)</script> ");
     await page.getByRole("button", { name: "Continue passage" }).click();
@@ -79,7 +89,7 @@ const screenshotRoot = process.env.LITFORGE_SCREENSHOTS;
   }
   assert.deepEqual(errors, []);
   console.log(
-    "PASS: all tabs, 2 byte models, Unicode/HTML text, attention and GRU views, mobile overflow, no browser errors.",
+    "PASS: all tabs and loaded byte models, default selection, Unicode/HTML text, attention and GRU views, mobile overflow, no browser errors.",
   );
   await browser.close();
 })().catch((error) => {

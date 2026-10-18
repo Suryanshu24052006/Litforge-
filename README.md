@@ -4,7 +4,7 @@
 
 LitForge trains small models to continue passages of text. It compares a Transformer and a GRU with a simpler method that counts short text patterns.
 
-Both neural models learned from three Jane Austen books. A local web app lets you try them, view the test results, and inspect their predictions. The trained files are included, and everything runs on a CPU.
+The models learned from three Jane Austen books. The app defaults to a longer-trained Transformer for text generation and keeps the original study checkpoints available. The trained files are included, and everything runs on a CPU.
 
 ## Run the app
 
@@ -29,7 +29,13 @@ Open **http://127.0.0.1:8000**. Start with `It was a quiet evening, and ` in **T
 
 </details>
 
-## What was compared
+## Longer-trained demo
+
+The original 1,200-update models produced many invented words. A separate Transformer run uses a larger training budget, with the saved checkpoint chosen by validation score. It is listed separately in the app and is not included in the original comparison table below.
+
+[See the output comparison](docs/DEMO.md) for the training history, all fixed-prompt samples, and the limits of the spelling check.
+
+## Original comparison
 
 The Transformer has 347,200 parameters; the GRU has 350,400. Each was trained three times, using the same sampled passages and byte budget for each seed. Training time and total computation were not matched.
 
@@ -61,7 +67,7 @@ The models invent words, repeat phrases, and lose track of a passage. The final 
 
 The context-length check also has a limitation: shortening the input changes the Transformer's position numbers. Its scores mix context length with position effects. The attention picture shows mixing weights, not a full explanation of a prediction.
 
-See [validation notes](docs/VALIDATION.md) for the 40-test suite and the browser and fresh-checkout checks.
+See [validation notes](docs/VALIDATION.md) for the test suite and the browser and fresh-checkout checks.
 
 ## Code and notes
 

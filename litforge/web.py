@@ -23,26 +23,31 @@ class GenerateRequest(BaseModel):
         default="It was a quiet evening, and ", min_length=1, max_length=512
     )
     max_new_tokens: int = Field(default=200, ge=1, le=512)
-    temperature: float = Field(default=0.8, ge=0.1, le=2.0)
+    temperature: float = Field(default=0.7, ge=0.1, le=2.0)
     top_k: int = Field(default=20, ge=1, le=256)
     seed: int = Field(default=42, ge=0, le=2**32 - 1)
-    model: Literal["primary", "gru"] = "primary"
+    model: Literal["primary", "gru", "extended"] | None = None
 
 
 class InspectRequest(BaseModel):
     prompt: str = Field(min_length=1, max_length=512)
-    model: Literal["primary", "gru"] = "primary"
+    model: Literal["primary", "gru", "extended"] | None = None
     layer: int = Field(default=0, ge=0)
     head: int = Field(default=0, ge=0)
 
 
-def create_app(checkpoint_path, comparison_path=None, study_path=None):
+def create_app(
+    checkpoint_path, comparison_path=None, study_path=None, extended_path=None
+):
     root = Path(__file__).resolve().parents[1]
     if Path(checkpoint_path).resolve().parent == (root / "models").resolve():
         verify_models(root)
     models = {"primary": load_checkpoint(checkpoint_path)}
     if comparison_path:
         models["gru"] = load_checkpoint(comparison_path)
+    if extended_path:
+        models = {"extended": load_checkpoint(extended_path), **models}
+    default_model = "extended" if extended_path else "primary"
     study_path = Path(study_path) if study_path else root / "artifacts/study/study.json"
     lock = threading.Lock()
     app = FastAPI(
@@ -56,6 +61,7 @@ def create_app(checkpoint_path, comparison_path=None, study_path=None):
     )
 
     def selected(name):
+        name = name or default_model
         if name not in models:
             raise HTTPException(404, "This comparison model is not loaded")
         return models[name]
@@ -66,18 +72,23 @@ def create_app(checkpoint_path, comparison_path=None, study_path=None):
 
     @app.get("/health")
     def health():
-        model, tokenizer, checkpoint = models["primary"]
+        model, tokenizer, checkpoint = models[default_model]
         records = []
         for name, (item, codec, weights) in models.items():
+            architecture = weights.get("architecture", "transformer")
+            title = "GRU" if architecture == "gru" else "Transformer"
             records.append(
                 {
                     "id": name,
-                    "architecture": weights.get("architecture", "transformer"),
+                    "architecture": architecture,
                     "parameters": item.parameter_count,
                     "context": item.config.context,
                     "unit": "byte" if isinstance(codec, ByteTokenizer) else "character",
                     "layers": item.config.layers,
                     "heads": getattr(item.config, "heads", 0),
+                    "training_step": weights["step"],
+                    "trained_bytes": weights.get("trained_bytes"),
+                    "label": f"{title} · {weights['step']:,} steps",
                 }
             )
         result = {
@@ -86,6 +97,7 @@ def create_app(checkpoint_path, comparison_path=None, study_path=None):
             "training_step": checkpoint["step"],
             "context_tokens": model.config.context,
             "models": records,
+            "default_model": default_model,
         }
         result[
             "context_bytes"
@@ -146,7 +158,7 @@ def create_app(checkpoint_path, comparison_path=None, study_path=None):
                 if isinstance(tokenizer, ByteTokenizer)
                 else "character",
                 "seconds": time.perf_counter() - start,
-                "model": request.model,
+                "model": request.model or default_model,
             }
         finally:
             lock.release()

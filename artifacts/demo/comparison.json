@@ -1,0 +1,254 @@
+{
+  "protocol_sha256": "fed68ae2019198b45d3d19f4e9f3a9a42686a2b5732ae7750348bc2786b1aeba",
+  "dataset_sha256": "fd6403e1d1d186ba495713d95dcffa583ff249911e2b28b01da56f99b1b447bc",
+  "settings": {
+    "prompts": [
+      "It was a quiet evening, and ",
+      "She looked at him and said, ",
+      "The next morning, ",
+      "I have always thought that "
+    ],
+    "seeds": [
+      42,
+      123
+    ],
+    "temperature": 0.7,
+    "top_k": 20,
+    "new_bytes": 240,
+    "word_metric": "fraction of generated ASCII words of two or more letters seen in training books; spelling proxy only, not coherence or writing quality"
+  },
+  "generation_source_sha256": "5afa0fa15ac085a014362a629a99ba1b5e8791ca3b202f818960f5f847658ea7",
+  "models": {
+    "original": {
+      "checkpoint_sha256": "dff9dd3ca18d56d91a15551dfc7032965dcac70c1315a9b0b3eea465c72654fd",
+      "step": 1200,
+      "trained_bytes": 2457600,
+      "validation_bpb": 2.7638609475948264,
+      "generated_words": 411,
+      "words_in_train_lexicon": 308,
+      "word_coverage": 0.7493917274939172,
+      "replacement_characters": 0
+    },
+    "extended": {
+      "checkpoint_sha256": "e4fc3c7b6c2e22827ff5788f377743579517537f9c725dd7d592c258e1d80f47",
+      "step": 16000,
+      "trained_bytes": 32768000,
+      "validation_bpb": 1.987911540737931,
+      "generated_words": 347,
+      "words_in_train_lexicon": 332,
+      "word_coverage": 0.9567723342939481,
+      "replacement_characters": 0
+    }
+  },
+  "samples": [
+    {
+      "prompt": "It was a quiet evening, and ",
+      "sampling_seed": 42,
+      "outputs": {
+        "original": {
+          "text": "It was a quiet evening, and being all that be\nfore mor to you was con the of him not the simite to arrraie of the was\nthe be to of his the for them of and on of he cand for for she live her could\nand in prie the she pertion suprt the was his dents. \n\nMrs. Pirrf. Nonll",
+          "continuation": "being all that be\nfore mor to you was con the of him not the simite to arrraie of the was\nthe be to of his the for them of and on of he cand for for she live her could\nand in prie the she pertion suprt the was his dents. \n\nMrs. Pirrf. Nonll",
+          "word_coverage": {
+            "known_words": 44,
+            "words": 54,
+            "fraction": 0.8148148148148148,
+            "replacement_characters": 0
+          }
+        },
+        "extended": {
+          "text": "It was a quiet evening, and proper, that she had been any\none worther of internations the most of hardly, and the expect shame\nin their situation many of a thousand was readful some particular\ninteresting.   I was more than she was easy. It will soon be in in from\nher",
+          "continuation": "proper, that she had been any\none worther of internations the most of hardly, and the expect shame\nin their situation many of a thousand was readful some particular\ninteresting.   I was more than she was easy. It will soon be in in from\nher",
+          "word_coverage": {
+            "known_words": 39,
+            "words": 42,
+            "fraction": 0.9285714285714286,
+            "replacement_characters": 0
+          }
+        }
+      }
+    },
+    {
+      "prompt": "It was a quiet evening, and ",
+      "sampling_seed": 123,
+      "outputs": {
+        "original": {
+          "text": "It was a quiet evening, and whought with a lin\nwas of it with you dis acking ito sall tal to have was as he of cof\nher mayming hawered do her in the could this his and the the his him soment to he\nreardied of to of her she she withe explance to frobectle with he prose",
+          "continuation": "whought with a lin\nwas of it with you dis acking ito sall tal to have was as he of cof\nher mayming hawered do her in the could this his and the the his him soment to he\nreardied of to of her she she withe explance to frobectle with he prose",
+          "word_coverage": {
+            "known_words": 36,
+            "words": 51,
+            "fraction": 0.7058823529411765,
+            "replacement_characters": 0
+          }
+        },
+        "extended": {
+          "text": "It was a quiet evening, and whose were now to be in his\nway all the same of a voice.  The companion of a reglation of highly\nmother appearance of her informance in a morning with she is a distress\nregret of Mr. Collins was surprised to her as they because it may be\nso",
+          "continuation": "whose were now to be in his\nway all the same of a voice.  The companion of a reglation of highly\nmother appearance of her informance in a morning with she is a distress\nregret of Mr. Collins was surprised to her as they because it may be\nso",
+          "word_coverage": {
+            "known_words": 42,
+            "words": 44,
+            "fraction": 0.9545454545454546,
+            "replacement_characters": 0
+          }
+        }
+      }
+    },
+    {
+      "prompt": "She looked at him and said, ",
+      "sampling_seed": 42,
+      "outputs": {
+        "original": {
+          "text": "She looked at him and said, but and to all and\nher more pose wer acon the of him not the simite to arrraie of the was\nthe be to of his the for them of and on of he cand for for she live her could\nand in prie the she pertion suprt the was his dents. \n\nMrs. Pirrf. Nonll",
+          "continuation": "but and to all and\nher more pose wer acon the of him not the simite to arrraie of the was\nthe be to of his the for them of and on of he cand for for she live her could\nand in prie the she pertion suprt the was his dents. \n\nMrs. Pirrf. Nonll",
+          "word_coverage": {
+            "known_words": 43,
+            "words": 54,
+            "fraction": 0.7962962962962963,
+            "replacement_characters": 0
+          }
+        },
+        "extended": {
+          "text": "She looked at him and said, and all the asserting that he was excecessived\nthan he was the mind already, and her felt the days of their sisters of\nthe same too suppose and after her refusion, and a clination of sight\nin the suppose of Miss Fairfax's business, for part",
+          "continuation": "and all the asserting that he was excecessived\nthan he was the mind already, and her felt the days of their sisters of\nthe same too suppose and after her refusion, and a clination of sight\nin the suppose of Miss Fairfax's business, for part",
+          "word_coverage": {
+            "known_words": 40,
+            "words": 43,
+            "fraction": 0.9302325581395349,
+            "replacement_characters": 0
+          }
+        }
+      }
+    },
+    {
+      "prompt": "She looked at him and said, ",
+      "sampling_seed": 123,
+      "outputs": {
+        "original": {
+          "text": "She looked at him and said, whought with a lin\nwas of it with you dis acking ito sall tal to have was as he of cof\nher mayming hawered do her in the could this his and the the his him soment to he\nreardied of to of her she she withe explance to frobectle with he prose",
+          "continuation": "whought with a lin\nwas of it with you dis acking ito sall tal to have was as he of cof\nher mayming hawered do her in the could this his and the the his him soment to he\nreardied of to of her she she withe explance to frobectle with he prose",
+          "word_coverage": {
+            "known_words": 36,
+            "words": 51,
+            "fraction": 0.7058823529411765,
+            "replacement_characters": 0
+          }
+        },
+        "extended": {
+          "text": "She looked at him and said, whose were no pleasure of it with his\ndaughters and her manner was a new man.\n\nThe contrarimation of Edward's life, the self pleasure of his mother,\nshe could always herself in the sister, which she was so many to prevent\nthat with her sist",
+          "continuation": "whose were no pleasure of it with his\ndaughters and her manner was a new man.\n\nThe contrarimation of Edward's life, the self pleasure of his mother,\nshe could always herself in the sister, which she was so many to prevent\nthat with her sist",
+          "word_coverage": {
+            "known_words": 42,
+            "words": 43,
+            "fraction": 0.9767441860465116,
+            "replacement_characters": 0
+          }
+        }
+      }
+    },
+    {
+      "prompt": "The next morning, ",
+      "sampling_seed": 42,
+      "outputs": {
+        "original": {
+          "text": "The next morning, befir all that and\nher mor to you was compened thing ther the imite to arrraie of the was\nthe be to of his the for them of and on of he cand for for she live her could\nand in prie the she pertion suprt the was his dents. \n\nMrs. Pirrf. Nonll",
+          "continuation": "befir all that and\nher mor to you was compened thing ther the imite to arrraie of the was\nthe be to of his the for them of and on of he cand for for she live her could\nand in prie the she pertion suprt the was his dents. \n\nMrs. Pirrf. Nonll",
+          "word_coverage": {
+            "known_words": 40,
+            "words": 52,
+            "fraction": 0.7692307692307693,
+            "replacement_characters": 0
+          }
+        },
+        "extended": {
+          "text": "The next morning, and all the asserting that he was expected to him.\n\nIn the most incommend this own complaint solitely and her effection,\nand he could dispose to for Mrs. Ferrars.\n\nElton was all to a signs in much thrown the interest of an intimater\ndespect",
+          "continuation": "and all the asserting that he was expected to him.\n\nIn the most incommend this own complaint solitely and her effection,\nand he could dispose to for Mrs. Ferrars.\n\nElton was all to a signs in much thrown the interest of an intimater\ndespect",
+          "word_coverage": {
+            "known_words": 38,
+            "words": 42,
+            "fraction": 0.9047619047619048,
+            "replacement_characters": 0
+          }
+        }
+      }
+    },
+    {
+      "prompt": "The next morning, ",
+      "sampling_seed": 123,
+      "outputs": {
+        "original": {
+          "text": "The next morning, whould gring a the\nwas out sure all sto he cauld ito say and to be of he mastion.\n\nShe he her mighte were prom you when seep presion indicioulde affurcelly somed cartied\nthe impenced fore comp the it in she him to to frobectle with he prose",
+          "continuation": "whould gring a the\nwas out sure all sto he cauld ito say and to be of he mastion.\n\nShe he her mighte were prom you when seep presion indicioulde affurcelly somed cartied\nthe impenced fore comp the it in she him to to frobectle with he prose",
+          "word_coverage": {
+            "known_words": 29,
+            "words": 46,
+            "fraction": 0.6304347826086957,
+            "replacement_characters": 0
+          }
+        },
+        "extended": {
+          "text": "The next morning, whose were no pleasure of it with you do not that\nto say and to be a good want of giving the party of delight of the character\nof their looking them, well in his continue of its little of company\nthe intention of speaking of his subject, an",
+          "continuation": "whose were no pleasure of it with you do not that\nto say and to be a good want of giving the party of delight of the character\nof their looking them, well in his continue of its little of company\nthe intention of speaking of his subject, an",
+          "word_coverage": {
+            "known_words": 47,
+            "words": 47,
+            "fraction": 1.0,
+            "replacement_characters": 0
+          }
+        }
+      }
+    },
+    {
+      "prompt": "I have always thought that ",
+      "sampling_seed": 42,
+      "outputs": {
+        "original": {
+          "text": "I have always thought that pof her to all and\nher more pornowed acon the of him not the simeten of withir this\na was the be to of his the for them of and on of him was for\nfor she live her could and in prie the she pertion suprted the in\nthe encerat benice arrd; pand",
+          "continuation": "pof her to all and\nher more pornowed acon the of him not the simeten of withir this\na was the be to of his the for them of and on of him was for\nfor she live her could and in prie the she pertion suprted the in\nthe encerat benice arrd; pand",
+          "word_coverage": {
+            "known_words": 41,
+            "words": 52,
+            "fraction": 0.7884615384615384,
+            "replacement_characters": 0
+          }
+        },
+        "extended": {
+          "text": "I have always thought that I have been as they were in poor with conversation,\nand the house which will be the being the days in their situation many\nof a thousand was readful some particular interesting.   I was more to\nthe profess.--My dear Miss Bates, with a reall",
+          "continuation": "I have been as they were in poor with conversation,\nand the house which will be the being the days in their situation many\nof a thousand was readful some particular interesting.   I was more to\nthe profess.--My dear Miss Bates, with a reall",
+          "word_coverage": {
+            "known_words": 39,
+            "words": 40,
+            "fraction": 0.975,
+            "replacement_characters": 0
+          }
+        }
+      }
+    },
+    {
+      "prompt": "I have always thought that ",
+      "sampling_seed": 123,
+      "outputs": {
+        "original": {
+          "text": "I have always thought that whough gring at to\nwas out sure all she had to caivourate tall was of he mastion.\n\nShe had Mr. She Mars. But the tisted seep presion indister, and not of with and to he\nreardied of to of her she she withe exelly the her be the with\nfore to ",
+          "continuation": "whough gring at to\nwas out sure all she had to caivourate tall was of he mastion.\n\nShe had Mr. She Mars. But the tisted seep presion indister, and not of with and to he\nreardied of to of her she she withe exelly the her be the with\nfore to ",
+          "word_coverage": {
+            "known_words": 39,
+            "words": 51,
+            "fraction": 0.7647058823529411,
+            "replacement_characters": 0
+          }
+        },
+        "extended": {
+          "text": "I have always thought that when I had not learned to it; but you do\nnot think of a man who the greatest in of its handsome time without me;\nbut I knew had soon indifferent a must have been calling to sight, and\none complaisely in speaking of the time, or it many of y",
+          "continuation": "when I had not learned to it; but you do\nnot think of a man who the greatest in of its handsome time without me;\nbut I knew had soon indifferent a must have been calling to sight, and\none complaisely in speaking of the time, or it many of y",
+          "word_coverage": {
+            "known_words": 45,
+            "words": 46,
+            "fraction": 0.9782608695652174,
+            "replacement_characters": 0
+          }
+        }
+      }
+    }
+  ],
+  "scope": "Validation-selected single-seed demo; original study and test scores unchanged. Lexicon coverage is a spelling proxy, not a coherence or writing-quality score. No test text is used here."
+}

@@ -1,0 +1,7 @@
+{
+  "complete": true,
+  "step": 16000,
+  "best_validation_bpb": 1.987911540737931,
+  "training_seconds": 1410.7288217659952,
+  "trained_bytes": 32768000
+}

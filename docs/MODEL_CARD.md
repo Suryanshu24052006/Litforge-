@@ -2,7 +2,7 @@
 
 ## What do they do?
 
-LitForge includes two small models: a **Transformer** and a **GRU**. Both try to continue an opening passage by predicting the next byte of text. They were trained from random starting weights, rather than downloaded as pretrained models.
+LitForge includes two model types: a **Transformer** and a **GRU**. The Transformer has an original study checkpoint and a longer-trained demo checkpoint. Each continues an opening passage by predicting the next byte of text. They were trained from random starting weights, rather than downloaded as pretrained models.
 
 They are useful for learning about text generation, comparing models, and exploring predictions in the app. They do not reliably answer questions or follow instructions.
 
@@ -10,14 +10,17 @@ They are useful for learning about text generation, comparing models, and explor
 |---|---:|---|
 | Transformer | 347,200 learned parameters | `models/novel-transformer.pt` |
 | GRU | 350,400 learned parameters | `models/novel-gru.pt` |
+| Transformer, longer training | 347,200 learned parameters | `models/extended-transformer.pt` |
 
 A parameter is a number adjusted during training. Both models can use up to **128 bytes of recent input**. A byte often holds one basic English character, but some characters need several bytes.
 
-## How were they trained?
+The app defaults to `models/extended-transformer.pt`. Its architecture matches the original Transformer, but it is trained for a larger budget and selected on validation only. It belongs to a separate single-seed demonstration, not the three-seed study below. See [the demo comparison](DEMO.md) for its measured scores and samples. The original checkpoints remain available in the model selector.
+
+## How were the study models trained?
 
 Both learned from *Pride and Prejudice*, *Sense and Sensibility*, and *Emma*. *Persuasion* was used to choose which saved version to keep. *Northanger Abbey* was kept for the final test.
 
-Each model was trained three times with different random seeds. Each run received the same amount of sampled training text. The two files included in the app use seed 42, chosen in the experiment plan before looking at test scores.
+Each study model was trained three times with different random seeds. Each run received the same amount of sampled training text. The two study checkpoint files use seed 42, chosen in the experiment plan before looking at test scores.
 
 The included files are ready for generation. They do not contain all the extra state needed to resume training; full training states stay in the local `runs/` directory.
 

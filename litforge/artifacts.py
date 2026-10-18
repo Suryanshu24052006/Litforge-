@@ -27,6 +27,15 @@ def export_study(study_directory, repository):
     plan = result["protocol"]
     if digest_json(plan) != result["protocol_sha256"]:
         raise ValueError("Study protocol identity does not match its results")
+    extra_models = {}
+    if (repository / "models/registry.json").exists():
+        previous = verify_models(repository)
+        extra_models = {
+            name: record
+            for name, record in previous["models"].items()
+            if name not in plan["models"]
+            and record.get("dataset_sha256") == result["dataset"]["dataset_sha256"]
+        }
     target = repository / "artifacts/study"
     target.mkdir(parents=True, exist_ok=True)
     write_json(target / "study.json", result)
@@ -36,7 +45,7 @@ def export_study(study_directory, repository):
         "version": 1,
         "selection": "predeclared seed; lowest validation BPB checkpoint; no test-based selection",
         "protocol_sha256": result["protocol_sha256"],
-        "models": {},
+        "models": extra_models,
     }
     for architecture in plan["models"]:
         for seed in plan["seeds"]:

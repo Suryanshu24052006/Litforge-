@@ -27,6 +27,8 @@ uv run --frozen python -m litforge generate --prompt "It was a quiet evening, an
 uv run --frozen python -m litforge generate --checkpoint models/novel-gru.pt --top-k 1
 ```
 
+Generation defaults to the longer-trained Transformer. Pass `--checkpoint models/novel-transformer.pt` to use the original Transformer, or `models/novel-gru.pt` for the original GRU.
+
 `--top-k 1` always chooses the highest-scoring next byte. Larger values allow sampling from more candidates. `--temperature` controls how spread out the sampling probabilities are. `--seed` makes the sampling repeatable in the tested environment. `--no-cache` uses the simpler reference generation path.
 
 ## Train the experiment again
@@ -55,6 +57,18 @@ To score an included model without retraining, download the books first, then ru
 ```bash
 uv run --frozen python -m litforge evaluate-book --checkpoint models/novel-gru.pt
 ```
+
+## Train the longer demo
+
+```bash
+uv run --frozen python -m litforge prepare-books
+uv run --frozen python -m litforge study --plan experiments/extended-demo.json --output runs/my-extended-demo --phase train
+uv run --frozen python -m litforge export-demo --run runs/my-extended-demo
+```
+
+This trains one Transformer with a longer budget. Checkpoint selection uses validation only; the original test book is not scored for the demo. Export saves fixed-prompt comparisons, an inference checkpoint, and its checksum. Complete training states remain in the run directory. Re-exporting the original study keeps verified extra models trained on the same corpus.
+
+The app lists the extended checkpoint separately, selects it by default, and keeps the original two checkpoints available. The Experiment tab continues to display the original matched-budget study. The [demo notes](DEMO.md) explain why vocabulary coverage is a spelling proxy rather than a writing-quality score.
 
 ## How the scores are calculated
 
@@ -93,4 +107,4 @@ uv run --frozen --extra plots python scripts/plot_study.py
 uv run --frozen python scripts/package_project.py
 ```
 
-The [validation notes](VALIDATION.md) include the optional browser-check command. Full training states stay in ignored `runs/`; downloaded text stays in ignored `data/`. The two small inference models and lightweight run records are included in Git. Inference-only files do not contain the optimizer and random-number states needed to resume training.
+The [validation notes](VALIDATION.md) include the optional browser-check command. Full training states stay in ignored `runs/`; downloaded text stays in ignored `data/`. All three inference checkpoints and lightweight run records are included in Git. Inference-only files do not contain the optimizer and random-number states needed to resume training.

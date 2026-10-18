@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "litforge"
-version = "0.2.0"
+version = "0.3.0"
 description = "Train, compare, and explore small text-generation models."
 authors = [{ name = "Suryanshu Chandel" }]
 maintainers = [{ name = "Suryanshu Chandel" }]

@@ -110,6 +110,7 @@ function drawCurve(data) {
 }
 function renderStudy(data) {
   studyData = data;
+  renderDemoNote();
   const cards = byId("score-cards");
   cards.replaceChildren();
   for (const row of data.aggregate) {
@@ -219,12 +220,17 @@ api("/health")
       data.models.forEach((model) => {
         const option = el(
           "option",
-          model.architecture === "gru" ? "GRU" : "Transformer",
+          model.label || (model.architecture === "gru" ? "GRU" : "Transformer"),
         );
         option.value = model.id;
         select.append(option);
       });
     });
+    document.querySelectorAll(".model-select").forEach((select) => {
+      select.value = data.default_model || "primary";
+    });
+    renderDemoNote();
+    renderWriterNote();
     updateInspector();
   })
   .catch((error) => {
@@ -268,6 +274,31 @@ byId("write-form").onsubmit = async (event) => {
     button.disabled = false;
   }
 };
+function renderDemoNote() {
+  if (!healthData || !studyData) return;
+  const demo = healthData.models.find((model) => model.id === "extended");
+  byId("extended-note").hidden = !demo;
+  if (demo)
+    byId("extended-note").textContent =
+      "The results below are from the original " +
+      studyData.protocol.steps.toLocaleString() +
+      "-step study. Try the models also includes a separate Transformer trained for " +
+      demo.training_step.toLocaleString() +
+      " steps. It is not part of this comparison table.";
+}
+function renderWriterNote() {
+  if (!healthData) return;
+  const model = healthData.models.find(
+    (item) => item.id === byId("writer-model").value,
+  );
+  if (!model) return;
+  byId("writer-model-note").textContent =
+    model.id === "extended"
+      ? "Longer-trained demo. Compare it with the original checkpoints using the same prompt and settings."
+      : "Original comparison checkpoint. The Experiment tab reports its training budget.";
+}
+byId("writer-model").onchange = renderWriterNote;
+
 function updateInspector() {
   if (!healthData) return;
   const model = healthData.models.find(

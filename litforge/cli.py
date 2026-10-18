@@ -38,6 +38,12 @@ def main():
     )
     exporting.add_argument("--study", default="runs/novel-study-v1")
     exporting.add_argument("--root", default=".")
+    demo_export = commands.add_parser(
+        "export-demo",
+        help="Publish the longer-trained model and fixed-prompt comparison",
+    )
+    demo_export.add_argument("--run", default="runs/extended-demo-v1")
+    demo_export.add_argument("--root", default=".")
     verifying = commands.add_parser(
         "verify-models", help="Check the bundled model digests before running the demo"
     )
@@ -78,10 +84,10 @@ def main():
     generation = commands.add_parser(
         "generate", help="Sample a continuation from a trained model"
     )
-    generation.add_argument("--checkpoint", default="models/novel-transformer.pt")
+    generation.add_argument("--checkpoint", default="models/extended-transformer.pt")
     generation.add_argument("--prompt", default="It was a quiet evening, and ")
     generation.add_argument("--tokens", type=int, default=300)
-    generation.add_argument("--temperature", type=float, default=0.8)
+    generation.add_argument("--temperature", type=float, default=0.7)
     generation.add_argument("--top-k", type=int, default=20)
     generation.add_argument("--seed", type=int, default=42)
     generation.add_argument("--threads", type=int, default=2)
@@ -93,6 +99,7 @@ def main():
     serving = commands.add_parser("serve", help="Run a local writing demo and JSON API")
     serving.add_argument("--checkpoint", default="models/novel-transformer.pt")
     serving.add_argument("--compare", help="Optional second GRU checkpoint")
+    serving.add_argument("--extended", help="Optional longer-trained Transformer demo")
     serving.add_argument(
         "--study", help="Optional exported study JSON for the dashboard"
     )
@@ -118,6 +125,11 @@ def main():
             from .artifacts import export_study
 
             print(json.dumps(export_study(args.study, args.root), indent=2))
+        elif args.command == "export-demo":
+            from .demo import export_demo
+
+            result = export_demo(args.run, args.root)
+            print(json.dumps(result["models"], indent=2))
         elif args.command == "evaluate-book":
             from .books import load_books
             from .study import evaluate_documents
@@ -168,14 +180,23 @@ def main():
 
             torch.set_num_threads(2)
             comparison = args.compare
+            extended = args.extended
             if (
                 comparison is None
                 and Path(args.checkpoint).resolve()
                 == Path("models/novel-transformer.pt").resolve()
             ):
                 comparison = "models/novel-gru.pt"
+            if (
+                extended is None
+                and Path(args.checkpoint).resolve()
+                == Path("models/novel-transformer.pt").resolve()
+            ):
+                candidate = Path("models/extended-transformer.pt")
+                if candidate.exists():
+                    extended = candidate
             uvicorn.run(
-                create_app(args.checkpoint, comparison, args.study),
+                create_app(args.checkpoint, comparison, args.study, extended),
                 host=args.host,
                 port=args.port,
             )

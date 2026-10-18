@@ -35,6 +35,16 @@ def test_full_study_export_serves_byte_models_and_detects_tampering(tmp_path):
     export_study(tmp_path / "runs", tmp_path / "published")
     root = tmp_path / "published"
     registry = verify_models(root)
+    import shutil
+
+    shutil.copyfile(root / "models/novel-transformer.pt", root / "models/kept.pt")
+    registry["models"]["other"] = {
+        **registry["models"]["transformer"],
+        "path": "models/kept.pt",
+    }
+    write_json(root / "models/registry.json", registry)
+    export_study(tmp_path / "runs", root)
+    assert "other" in verify_models(root)["models"]
     for name in ("transformer", "gru"):
         assert registry["models"][name]["seed"] == 7
         checkpoint = root / registry["models"][name]["path"]
@@ -82,8 +92,6 @@ def test_full_study_export_serves_byte_models_and_detects_tampering(tmp_path):
     with pytest.raises(ValueError, match="checksum"):
         verify_models(root)
     # A file moved between valid run folders must not silently relabel results.
-    import shutil
-
     shutil.copyfile(
         tmp_path / "runs/gru-7/best.pt", tmp_path / "runs/transformer-7/best.pt"
     )

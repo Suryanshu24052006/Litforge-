@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "name": "extended-demo-v1",
+  "question": "Does a longer training budget improve the readability of the small Transformer?",
+  "seeds": [
+    42
+  ],
+  "steps": 16000,
+  "batch_size": 16,
+  "learning_rate": 0.001,
+  "eval_every": 1000,
+  "threads": 2,
+  "models": {
+    "transformer": {
+      "vocab_size": 256,
+      "context": 128,
+      "width": 112,
+      "heads": 4,
+      "layers": 2,
+      "dropout": 0.1
+    }
+  },
+  "context_probe": {
+    "lengths": [
+      8,
+      32,
+      128
+    ],
+    "anchors": 256
+  },
+  "demo_seed": 42,
+  "selection": "lowest full-book validation bits per byte; original study remains unchanged; no test-based checkpoint selection",
+  "budget_note": "separate extended-training demonstration, not part of the original matched-budget comparison",
+  "baselines": {
+    "ngram_order": 4,
+    "backoff_strength": 10.0,
+    "unigram_alpha": 0.1
+  },
+  "generation_check": {
+    "prompts": [
+      "It was a quiet evening, and ",
+      "She looked at him and said, ",
+      "The next morning, ",
+      "I have always thought that "
+    ],
+    "seeds": [
+      42,
+      123
+    ],
+    "temperature": 0.7,
+    "top_k": 20,
+    "new_bytes": 240,
+    "word_metric": "fraction of generated ASCII words of two or more letters seen in training books; spelling proxy only, not coherence or writing quality"
+  }
+}
