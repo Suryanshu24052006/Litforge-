@@ -2,15 +2,15 @@
 
 [![tests](https://github.com/Suryanshu24052006/Litforge-/actions/workflows/ci.yml/badge.svg)](https://github.com/Suryanshu24052006/Litforge-/actions/workflows/ci.yml)
 
-**A small project for learning how AI generates text.**
+A small text-generation project built with PyTorch. Give it the start of a passage, and it tries to write what comes next.
 
-Give LitForge an opening such as `It was a quiet evening, and `, and it tries to continue the passage. You can try two models, compare their results, and see which earlier parts of the text a Transformer pays attention to.
+LitForge compares a Transformer, a GRU, and a simple method that counts short text patterns. The models were trained from scratch on Jane Austen's books. You can run both neural models, compare their writing, and look at their predictions in a local web app.
 
-Both models were trained from scratch on books by Jane Austen. They run on a normal CPU and need no API key. The trained models are included, so you can try them without training anything yourself.
+Maintained by [Suryanshu Chandel](https://github.com/Suryanshu24052006).
 
-## Run it
+## Try it
 
-Install [uv](https://docs.astral.sh/uv/), then run:
+You'll need Python 3.11–3.13 and [uv](https://docs.astral.sh/uv/).
 
 ```bash
 git clone https://github.com/Suryanshu24052006/Litforge-.git
@@ -20,72 +20,72 @@ uv run --frozen python -m litforge verify-models
 uv run --frozen python -m litforge serve
 ```
 
-Open **http://127.0.0.1:8000** in your browser. Use Python 3.11, 3.12, or 3.13.
+Open **http://127.0.0.1:8000**. The trained models are included. You don't need to train them first, use a GPU, or provide an API key.
 
-`verify-models` checks that the included model files are intact. `serve` starts the app.
+Start with an opening like `It was a quiet evening, and `. Try both models with the same settings, then change the temperature to see how the output changes.
 
-## What can I do in the app?
+The app has three tabs:
 
-| Tab | What it shows |
-|---|---|
-| Experiment | Training progress and test results |
-| Try the models | Enter an opening and generate a continuation |
-| Inside the model | See possible next bytes and where a Transformer attention head looks |
-
-Try the same opening with both models. Then change the temperature: a lower value usually makes the output more predictable; a higher value makes it more varied.
+- **Experiment** shows the training curves and test results.
+- **Try the models** lets you write an opening and generate a continuation.
+- **Inside the model** shows possible next bytes and the weights from a selected attention head.
 
 <details>
-<summary>See the app</summary>
+<summary>App screenshot</summary>
 
 ![LitForge dashboard](docs/dashboard.png)
 
 </details>
 
-## What did I compare?
+## The comparison
 
-- **Transformer:** uses attention to look back at earlier text.
-- **GRU:** carries information forward in a memory state as it reads.
-- **4-gram:** a simple comparison method that counts short text patterns. It is included in the results, rather than the text-generation demo.
+The Transformer uses attention to look back at earlier text. The GRU updates a memory state as it reads. The 4-gram baseline counts short patterns and uses their frequencies to predict the next byte.
 
-The Transformer and GRU are almost the same size. Each received the same amount of training text, with the same sampled passages for each random seed. Each was trained three times to check how much the result changes between runs. Training time and the amount of computation were not matched.
+The two neural models are almost the same size. They received the same sampled passages and the same total training-byte budget for each seed. Each was trained three times with different random seeds. Training time and total computation were not matched.
 
-Different books had different jobs:
-
-| Job | Books |
+| Purpose | Books |
 |---|---|
-| Learn patterns | Pride and Prejudice, Sense and Sensibility, Emma |
-| Choose the saved model | Persuasion |
-| Measure the final result | Northanger Abbey |
+| Training | Pride and Prejudice, Sense and Sensibility, Emma |
+| Choosing the saved model | Persuasion |
+| Final test | Northanger Abbey |
 
-## What happened?
+Using separate books lets the final test check text the models did not train on.
 
-| Method | Test score: lower is better |
+## Results
+
+| Method | Test BPB ↓ |
 |---|---:|
 | **4-gram** | **2.295** |
 | GRU | 2.505 |
 | Transformer | 2.730 |
 
-The score is called **bits per byte**, or **BPB**. It measures how well a method predicts the actual text. A byte is a small unit of text data; in ordinary English, many characters take one byte. **This score is not an accuracy percentage.** The neural-model scores above are averages of three training runs.
+**BPB means bits per byte. Lower is better.** It measures how well a method predicts the actual text, rather than how good its writing sounds. The neural scores are averages across three training runs.
 
-The GRU did better than the Transformer in this experiment, and the simple 4-gram did better than both. That is a useful finding: a more complicated model does not automatically win on a small training budget. The 4-gram counts all the training text directly, so its learning process differs from neural training.
+The GRU beat the Transformer at this budget, and the 4-gram beat both. The baseline counts all training text directly; neural training samples passages repeatedly. The result is specific to these books and training settings.
 
-The [full results](docs/STUDY.md) include every method, variation between runs, and real output samples.
+The [full results](docs/STUDY.md) include all baselines, variation between runs, and unedited output samples.
 
-## What are the limits?
+## What to expect
 
-The models still invent words, repeat phrases, and write awkward sentences. They continue text; they are not chat assistants. They remember only a short input window, and the test covers one book by one author. These results do not establish performance on other authors or tasks.
+The writing is rough. Both models invent words, repeat themselves, and lose track of a passage. Their input window is only 128 bytes. A byte often represents one basic English character, while some characters need several bytes.
 
-The project includes 40 passing tests, saved training records, and checks for training recovery, model files, and API behavior. It has also been checked in a browser and from a fresh checkout. See [what was tested](docs/VALIDATION.md).
+The final test uses one book by one author, so it says little about other authors or tasks. Attention pictures show how one head mixes information; they aren't a complete explanation of a prediction.
 
-## Want to understand it for an interview?
+The project includes saved training records and 40 passing tests covering training recovery, evaluation, model files, generation, and API behavior. The app was also checked in Chromium and from a fresh checkout. See the [validation notes](docs/VALIDATION.md).
 
-Start with the [simple interview guide](docs/INTERVIEW.md). It explains the project, the result, and a short demo in everyday language.
+## Explore the project
 
-For more detail:
+- [Developer guide](docs/DEVELOPMENT.md) — commands, code map, and technical terms.
+- [Models](docs/MODEL_CARD.md) — training settings and limitations.
+- [Data](DATA.md) — book sources and preparation.
+- [References](docs/REFERENCES.md) — methods and projects consulted.
 
-- [Developer guide](docs/DEVELOPMENT.md): commands, code map, and technical terms.
-- [About the models](docs/MODEL_CARD.md): sizes, training, and limitations.
-- [About the data](DATA.md): book sources and how they were prepared.
-- [References](docs/REFERENCES.md): methods and open-source projects consulted.
+The original Shakespeare experiment is kept in [earlier results](docs/RESULTS.md) and [performance notes](docs/PERFORMANCE.md). It uses different text and score units, so its scores can't be compared directly with the Austen study.
 
-The earlier Shakespeare experiment is preserved in [older results](docs/RESULTS.md) and [speed measurements](docs/PERFORMANCE.md). Its scores use different text and units, so they cannot be compared directly with this experiment.
+## People and contributions
+
+[Suryanshu Chandel (@Suryanshu24052006)](https://github.com/Suryanshu24052006) maintains this project. See [contributors](CONTRIBUTORS.md) for project credit and [contributing](CONTRIBUTING.md) if you'd like to help.
+
+Ideas, bug reports, and small improvements are welcome. If a result looks wrong, include the command you ran and what you expected to happen.
+
+Code is available under the [MIT license](LICENSE). The training texts have their own source terms, described in [DATA.md](DATA.md).

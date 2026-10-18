@@ -19,6 +19,8 @@ def main():
             "pyproject.toml",
             "uv.lock",
             "README.md",
+            "CONTRIBUTORS.md",
+            "CONTRIBUTING.md",
             "DATA.md",
             "LICENSE",
             ".gitignore",

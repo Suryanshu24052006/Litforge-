@@ -5,9 +5,16 @@ build-backend = "hatchling.build"
 [project]
 name = "litforge"
 version = "0.2.0"
-description = "A reproducible small-model lab comparing attention, recurrence, and byte n-grams."
+description = "Train, compare, and explore small text-generation models."
+authors = [{ name = "Suryanshu Chandel" }]
+maintainers = [{ name = "Suryanshu Chandel" }]
 requires-python = ">=3.11,<3.14"
 dependencies = ["torch==2.8.0", "numpy>=1.26,<3", "fastapi>=0.115,<1", "uvicorn>=0.34,<1"]
+
+[project.urls]
+Homepage = "https://github.com/Suryanshu24052006/Litforge-"
+Repository = "https://github.com/Suryanshu24052006/Litforge-"
+Issues = "https://github.com/Suryanshu24052006/Litforge-/issues"
 
 [project.optional-dependencies]
 dev = ["pytest>=8,<10", "httpx>=0.28,<1", "ruff>=0.14,<1"]

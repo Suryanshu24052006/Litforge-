@@ -12,7 +12,7 @@ Both paths loaded the same 1,816,896-parameter checkpoint and ran on CPU with tw
 | Crosses context limit: 7-character prompt + 200 new characters | 508.5 ms | 351.4 ms | 1.45× |
 | Full context: 128-character prompt + 80 new characters | 249.6 ms | 251.4 ms | 0.99× |
 
-The useful interview detail is the last row. Once the 128-character context is full, the window slides after every generated character. This model uses learned position embeddings, so the cache must be rebuilt. That workload has no meaningful speed improvement. The cache is more useful while the context is still growing.
+The last row shows the limit of this approach. Once the 128-character context is full, the window slides after every generated character. This model uses learned position embeddings, so the cache must be rebuilt. That workload has no meaningful speed improvement. The cache is more useful while the context is still growing.
 
 A full FP32 cache for one passage holds up to 768 KiB of keys and values across four layers. Temporary attention tensors and concatenation allocations use additional memory. This is a small memory-for-compute tradeoff.
 
@@ -40,6 +40,6 @@ uv run --frozen --extra dev pytest -q
 
 Raw timings, the checkpoint digest, settings, and software version are in [benchmark.json](benchmark.json). This is one local CPU benchmark. Other machines and background workloads can change the results. The GPU path has not been benchmarked.
 
-## A clear way to explain it
+## How the cache works
 
-> The original generator kept recomputing the prompt. I stored each layer's attention keys and values so it only had to process the new character while the window grew. For an 80-character continuation from a short prompt, median latency improved by about 2.23 times. For a full context, the speed was roughly unchanged because I rebuild the cache to keep the model's original behavior.
+The original generator recomputed the prompt at every step. The cache stores each layer's attention keys and values, so only the new character needs processing while the window grows. For an 80-character continuation from a short prompt, median latency improved by about 2.23 times. With a full context, speed was roughly unchanged because rebuilding the cache preserves the model's original predictions.
