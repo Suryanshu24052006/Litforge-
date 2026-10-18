@@ -2,15 +2,13 @@
 
 [![tests](https://github.com/Suryanshu24052006/Litforge-/actions/workflows/ci.yml/badge.svg)](https://github.com/Suryanshu24052006/Litforge-/actions/workflows/ci.yml)
 
-A small text-generation project built with PyTorch. Give it the start of a passage, and it tries to write what comes next.
+LitForge trains small models to continue passages of text. It compares a Transformer and a GRU with a simpler method that counts short text patterns.
 
-LitForge compares a Transformer, a GRU, and a simple method that counts short text patterns. The models were trained from scratch on Jane Austen's books. You can run both neural models, compare their writing, and look at their predictions in a local web app.
+Both neural models learned from three Jane Austen books. A local web app lets you try them, view the test results, and inspect their predictions. The trained files are included, and everything runs on a CPU.
 
-Maintained by [Suryanshu Chandel](https://github.com/Suryanshu24052006).
+## Run the app
 
-## Try it
-
-You'll need Python 3.11–3.13 and [uv](https://docs.astral.sh/uv/).
+Install [uv](https://docs.astral.sh/uv/) and use Python 3.11–3.13:
 
 ```bash
 git clone https://github.com/Suryanshu24052006/Litforge-.git
@@ -20,15 +18,9 @@ uv run --frozen python -m litforge verify-models
 uv run --frozen python -m litforge serve
 ```
 
-Open **http://127.0.0.1:8000**. The trained models are included. You don't need to train them first, use a GPU, or provide an API key.
+Open **http://127.0.0.1:8000**. Start with `It was a quiet evening, and ` in **Try the models**. Use the same opening and settings for both models to compare their output. Temperature controls how varied the sampling is.
 
-Start with an opening like `It was a quiet evening, and `. Try both models with the same settings, then change the temperature to see how the output changes.
-
-The app has three tabs:
-
-- **Experiment** shows the training curves and test results.
-- **Try the models** lets you write an opening and generate a continuation.
-- **Inside the model** shows possible next bytes and the weights from a selected attention head.
+**Experiment** has the training curves and test scores. **Inside the model** shows likely next bytes and a selected attention head's weights. The GRU uses recurrent memory, so it has no attention matrix.
 
 <details>
 <summary>App screenshot</summary>
@@ -37,11 +29,9 @@ The app has three tabs:
 
 </details>
 
-## The comparison
+## What was compared
 
-The Transformer uses attention to look back at earlier text. The GRU updates a memory state as it reads. The 4-gram baseline counts short patterns and uses their frequencies to predict the next byte.
-
-The two neural models are almost the same size. They received the same sampled passages and the same total training-byte budget for each seed. Each was trained three times with different random seeds. Training time and total computation were not matched.
+The Transformer has 347,200 parameters; the GRU has 350,400. Each was trained three times, using the same sampled passages and byte budget for each seed. Training time and total computation were not matched.
 
 | Purpose | Books |
 |---|---|
@@ -49,7 +39,7 @@ The two neural models are almost the same size. They received the same sampled p
 | Choosing the saved model | Persuasion |
 | Final test | Northanger Abbey |
 
-Using separate books lets the final test check text the models did not train on.
+The models predict UTF-8 bytes. A basic English letter takes one byte; some characters take several. Both models can use up to 128 bytes of recent input.
 
 ## Results
 
@@ -59,33 +49,31 @@ Using separate books lets the final test check text the models did not train on.
 | GRU | 2.505 |
 | Transformer | 2.730 |
 
-**BPB means bits per byte. Lower is better.** It measures how well a method predicts the actual text, rather than how good its writing sounds. The neural scores are averages across three training runs.
+**Lower bits per byte (BPB) means better prediction of the actual test text.** It isn't an accuracy percentage or a writing-quality score. Neural results are averages across three runs.
 
-The GRU beat the Transformer at this budget, and the 4-gram beat both. The baseline counts all training text directly; neural training samples passages repeatedly. The result is specific to these books and training settings.
+The GRU scored better than the Transformer. The 4-gram baseline beat both: it predicts a byte using counts of patterns with up to three preceding bytes. It counts all training text directly, whereas neural training samples passages repeatedly.
 
-The [full results](docs/STUDY.md) include all baselines, variation between runs, and unedited output samples.
+The [full results](docs/STUDY.md) include the other baselines, variation between runs, and actual generated passages. Raw records are in [artifacts/study](artifacts/study/).
 
-## What to expect
+## What still falls short
 
-The writing is rough. Both models invent words, repeat themselves, and lose track of a passage. Their input window is only 128 bytes. A byte often represents one basic English character, while some characters need several bytes.
+The models invent words, repeat phrases, and lose track of a passage. The final test covers one book by one author. More books and larger training budgets would be needed to judge how broadly the result holds.
 
-The final test uses one book by one author, so it says little about other authors or tasks. Attention pictures show how one head mixes information; they aren't a complete explanation of a prediction.
+The context-length check also has a limitation: shortening the input changes the Transformer's position numbers. Its scores mix context length with position effects. The attention picture shows mixing weights, not a full explanation of a prediction.
 
-The project includes saved training records and 40 passing tests covering training recovery, evaluation, model files, generation, and API behavior. The app was also checked in Chromium and from a fresh checkout. See the [validation notes](docs/VALIDATION.md).
+See [validation notes](docs/VALIDATION.md) for the 40-test suite and the browser and fresh-checkout checks.
 
-## Explore the project
+## Code and notes
 
-- [Developer guide](docs/DEVELOPMENT.md) — commands, code map, and technical terms.
-- [Models](docs/MODEL_CARD.md) — training settings and limitations.
-- [Data](DATA.md) — book sources and preparation.
-- [References](docs/REFERENCES.md) — methods and projects consulted.
+- [Developer guide](docs/DEVELOPMENT.md): commands and a map of the code.
+- [Model card](docs/MODEL_CARD.md): architecture, training settings, and limits.
+- [Data](DATA.md): book sources and preparation.
+- [References](docs/REFERENCES.md): papers, libraries, and implementations consulted.
 
-The original Shakespeare experiment is kept in [earlier results](docs/RESULTS.md) and [performance notes](docs/PERFORMANCE.md). It uses different text and score units, so its scores can't be compared directly with the Austen study.
+The [earlier Shakespeare results](docs/RESULTS.md) and [performance notes](docs/PERFORMANCE.md) use different data and score units.
 
-## People and contributions
+## Maintainer
 
-[Suryanshu Chandel (@Suryanshu24052006)](https://github.com/Suryanshu24052006) maintains this project. See [contributors](CONTRIBUTORS.md) for project credit and [contributing](CONTRIBUTING.md) if you'd like to help.
+[Suryanshu Chandel (@Suryanshu24052006)](https://github.com/Suryanshu24052006). Project credit is in [CONTRIBUTORS.md](CONTRIBUTORS.md); setup and pull-request notes are in [CONTRIBUTING.md](CONTRIBUTING.md).
 
-Ideas, bug reports, and small improvements are welcome. If a result looks wrong, include the command you ran and what you expected to happen.
-
-Code is available under the [MIT license](LICENSE). The training texts have their own source terms, described in [DATA.md](DATA.md).
+Code is [MIT licensed](LICENSE). Training-text sources and terms are listed in [DATA.md](DATA.md).

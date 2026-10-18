@@ -1,12 +1,12 @@
 # Full results
 
-This page shows the full measurements behind the simple result table in the README. We checked how well small models predict a book they did not train on. The numbers come from the saved run records.
+These measurements come from the [saved run records](../artifacts/study/). The models were evaluated on complete books kept out of training.
 
 **How to read the score:** lower bits per byte (BPB) means better prediction of the actual text. It is not an accuracy percentage. See the [developer guide](DEVELOPMENT.md) for formulas and technical terms.
 
 ## How the comparison was run
 
-Each neural model receives 2,457,600 sampled training bytes per run. The random seeds are 17, 42, 73. The models are almost the same size and use the same training settings. Training time and computation are not matched, and the shared settings may suit one model better than the other.
+Each neural model receives 2,457,600 sampled training bytes per run. The random seeds are 17, 42, 73. Model sizes are listed in the table below. Training uses the settings in the plan; time and computation are not matched. Shared settings may suit one model better than another.
 
 Training passages stay inside one book. Text is represented as UTF-8 bytes, using 256 possible values. Gutenberg headers and footers are removed. The earlier Shakespeare experiment used different text and character-level scores, so its results cannot be compared directly with these.
 
@@ -61,9 +61,9 @@ Shortening the input also changes the position numbers used by the Transformer. 
 
 ## What can we conclude?
 
-GRU has the best average test score among the neural models. The 4-gram comparison method scores better than the average of each neural model at this training budget. This result applies to these books, settings, and training budget. It does not tell us which method is always best.
+GRU has the lowest average neural test BPB. The 4-gram baseline scores lower than every neural model's average.
 
-Using separate books gives a stronger test than splitting one book into sections. The final test still covers only one book by one author. These scores do not establish performance on other authors, conversation, or human writing quality. More books, more seeds, and different training budgets would be follow-up experiments.
+The final test covers one book by one author. Testing more books and training budgets would show whether this ranking holds elsewhere. These scores do not measure conversation or human writing quality.
 
 ## Real model output
 

@@ -82,13 +82,13 @@ def render_study_report(result, destination):
     lines = [
         "# Full results",
         "",
-        "This page shows the full measurements behind the simple result table in the README. We checked how well small models predict a book they did not train on. The numbers come from the saved run records.",
+        "These measurements come from the [saved run records](../artifacts/study/). The models were evaluated on complete books kept out of training.",
         "",
         "**How to read the score:** lower bits per byte (BPB) means better prediction of the actual text. It is not an accuracy percentage. See the [developer guide](DEVELOPMENT.md) for formulas and technical terms.",
         "",
         "## How the comparison was run",
         "",
-        f"Each neural model receives {plan['steps'] * plan['batch_size'] * next(iter(plan['models'].values()))['context']:,} sampled training bytes per run. The random seeds are {', '.join(map(str, plan['seeds']))}. The models are almost the same size and use the same training settings. Training time and computation are not matched, and the shared settings may suit one model better than the other.",
+        f"Each neural model receives {plan['steps'] * plan['batch_size'] * next(iter(plan['models'].values()))['context']:,} sampled training bytes per run. The random seeds are {', '.join(map(str, plan['seeds']))}. Model sizes are listed in the table below. Training uses the settings in the plan; time and computation are not matched. Shared settings may suit one model better than another.",
         "",
         "Training passages stay inside one book. Text is represented as UTF-8 bytes, using 256 possible values. Gutenberg headers and footers are removed. The earlier Shakespeare experiment used different text and character-level scores, so its results cannot be compared directly with these.",
         "",
@@ -163,11 +163,12 @@ def render_study_report(result, destination):
             )
     best = min(result["aggregate"], key=lambda r: r["mean_test_bpb"])
     ngram = min(result["ngram_baselines"], key=lambda row: row["bits_per_byte"])
-    verdict = (
-        f"The {ngram['order']}-gram comparison method scores better than the average of each neural model at this training budget."
-        if ngram["bits_per_byte"] < min(r["mean_test_bpb"] for r in result["aggregate"])
-        else "At least one neural model averages a better score than the strongest n-gram comparison method."
-    )
+    if ngram["bits_per_byte"] < best["mean_test_bpb"]:
+        verdict = f"The {ngram['order']}-gram baseline scores lower than every neural model's average."
+    elif ngram["bits_per_byte"] > best["mean_test_bpb"]:
+        verdict = f"The best neural average scores lower than the {ngram['order']}-gram baseline."
+    else:
+        verdict = f"The best neural average and the {ngram['order']}-gram baseline have the same score."
     lines += [
         "",
         f"Shortening the input also changes the position numbers used by the Transformer. This mixes two effects: how much text it sees and how it uses positions. With {plan['context_probe']['anchors']} requested target positions and {len(plan['seeds'])} seeds, this check cannot prove that more context always helps.",
@@ -176,9 +177,9 @@ def render_study_report(result, destination):
         "",
         "## What can we conclude?",
         "",
-        f"{best['architecture'].upper()} has the best average test score among the neural models. {verdict} This result applies to these books, settings, and training budget. It does not tell us which method is always best.",
+        f"{best['architecture'].upper()} has the lowest average neural test BPB. {verdict}",
         "",
-        "Using separate books gives a stronger test than splitting one book into sections. The final test still covers only one book by one author. These scores do not establish performance on other authors, conversation, or human writing quality. More books, more seeds, and different training budgets would be follow-up experiments.",
+        "The final test covers one book by one author. Testing more books and training budgets would show whether this ranking holds elsewhere. These scores do not measure conversation or human writing quality.",
         "",
         "## Real model output",
         "",

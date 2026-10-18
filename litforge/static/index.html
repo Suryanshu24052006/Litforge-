@@ -15,12 +15,12 @@
     </header>
     <main>
       <section class="hero">
-        <div class="eyebrow">ATTENTION · RECURRENCE · CONTEXT</div>
-        <h1>How much does a small model learn from context?</h1>
+        <div class="eyebrow">TRAINED ON AUSTEN · RUNS ON CPU</div>
+        <h1>Compare two small text-generation models.</h1>
         <p>
-          Compare a Transformer and a GRU trained from scratch on the same books
-          and byte budget. Explore held-out results, try both models, and look
-          inside an attention head.
+          A Transformer and a GRU learned from the same sampled passages. See
+          their test results, give them an opening to continue, and inspect
+          their next-byte predictions.
         </p>
       </section>
       <nav role="tablist" aria-label="Lab views">
@@ -38,7 +38,7 @@
         </div>
         <div class="card">
           <div class="row">
-            <h2>What changes as training progresses?</h2>
+            <h2>Training progress</h2>
             <span class="pill">Validation only</span>
           </div>
           <div class="legend">
@@ -51,8 +51,8 @@
             aria-label="Mean validation bits per byte over training steps"
           ></canvas>
           <div class="subtle">
-            Mean validation BPB across seeds. Lower is better. Checkpoint
-            selection uses validation, not the test book.
+            Average validation BPB across training runs; lower is better. The
+            validation score chooses the saved model before final test scoring.
           </div>
         </div>
         <div class="grid">
@@ -69,12 +69,14 @@
               </table>
             </div>
             <p class="subtle">
-              The same target positions are scored at each context length. This
-              sampled diagnostic is separate from the complete-book score.
+              Each input length predicts the same selected bytes. Shorter inputs
+              also change the Transformer’s position numbers, so this check
+              mixes context and position effects. It is separate from the
+              full-book score.
             </p>
           </div>
           <div class="card">
-            <h2>How strong are local patterns?</h2>
+            <h2>Pattern-counting baselines</h2>
             <div class="table-wrap">
               <table id="baselines">
                 <thead>
@@ -87,28 +89,28 @@
               </table>
             </div>
             <p class="subtle">
-              N-grams use the same evaluation boundaries. Their counts are
-              fitted on all training text.
+              These methods count short patterns in all training text.
+              Evaluation resets context at the same boundaries as the neural
+              models.
             </p>
           </div>
         </div>
         <div class="card">
-          <h2>Different books for different jobs</h2>
+          <h2>Books used at each stage</h2>
           <div id="splits" class="split-grid"></div>
           <div class="notice" id="protocol-note">
             Training and validation never score the held-out test book.
           </div>
         </div>
         <div class="card">
-          <h2>How to read this experiment</h2>
+          <h2>Reading the scores</h2>
           <p class="subtle">
-            Bits per byte measures how much probability the model gives to the
-            text that actually occurred. It is not an accuracy percentage or a
-            writing-quality score. Parameters and training bytes are matched
-            approximately and exactly, respectively; FLOPs and wall time are not
-            matched. One author, one final test book, and three seeds limit the
-            conclusions. A lower baseline score is a useful result, not
-            something to hide.
+            Lower bits per byte (BPB) means better prediction of the actual
+            text. SD shows variation between training runs. Neither is a
+            writing-quality rating. The neural models have almost the same
+            number of parameters and the same training-byte budget; time and
+            computation differ. Results cover one author, one final test book,
+            and three seeds.
           </p>
         </div>
       </section>
