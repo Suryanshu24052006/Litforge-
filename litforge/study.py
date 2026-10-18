@@ -160,7 +160,17 @@ def train_run(plan, architecture, seed, data, output, stop_after=None):
             if saved["source"][key] != identity[key]:
                 raise ValueError(f"Resume source/software mismatch: {key}")
         if previous["step"] == plan["steps"]:
-            return json.loads((output / "summary.json").read_text())
+            # last.pt is committed before summary.json. Rebuild the latter even
+            # if a crash left it missing or carrying an earlier pause step.
+            summary = {
+                "complete": True,
+                "step": previous["step"],
+                "best_validation_bpb": previous["best_validation_bpb"],
+                "training_seconds": previous["elapsed_seconds"],
+                "trained_bytes": previous["trained_bytes"],
+            }
+            write_json(output / "summary.json", summary)
+            return summary
         model.load_state_dict(previous["state_dict"])
         optimizer.load_state_dict(previous["optimizer"])
         generator.set_state(previous["batch_rng"])
@@ -339,6 +349,15 @@ def finalize_study(plan, data, output):
         for seed in plan["seeds"]:
             folder = output / f"{name}-{seed}"
             model, tokenizer, checkpoint = load_checkpoint(folder / "best.pt")
+            if checkpoint["architecture"] != name or checkpoint["seed"] != seed:
+                raise ValueError("Checkpoint architecture or seed differs from its run")
+            if any(
+                checkpoint["model_config"].get(key) != value
+                for key, value in plan["models"][name].items()
+            ):
+                raise ValueError(
+                    "Checkpoint model configuration differs from the protocol"
+                )
             if checkpoint["dataset_sha256"] != manifest["dataset_sha256"] or checkpoint[
                 "protocol_sha256"
             ] != digest_json(plan):
@@ -400,7 +419,7 @@ def finalize_study(plan, data, output):
         "runs": results,
         "aggregate": aggregates,
         "ngram_baselines": baseline_scores,
-        "interpretation": "one independent test book by the same author; three seeds are limited evidence; lower BPB is better",
+        "interpretation": f"{len(splits['test'])} held-out book(s), {len(plan['seeds'])} training seed(s); seed variation does not measure variation across works; lower BPB is better",
     }
     write_json(output / "study.json", result)
     return result

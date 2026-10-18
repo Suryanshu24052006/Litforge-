@@ -1,0 +1,62 @@
+{
+  "architecture": "gru",
+  "seed": 73,
+  "parameters": 350400,
+  "selected_step": 1200,
+  "validation": {
+    "bits_per_byte": 2.5466585242461983,
+    "loss_nats_per_byte": 1.7652091759302033,
+    "perplexity_per_byte": 5.842794402224501,
+    "targets_scored": 467009,
+    "books": [
+      {
+        "book": "persuasion",
+        "loss_nats_per_byte": 1.7652091759302033,
+        "perplexity_per_byte": 5.842794402224501,
+        "bits_per_byte": 2.5466585242461983,
+        "targets_scored": 467009
+      }
+    ]
+  },
+  "test": {
+    "bits_per_byte": 2.507254556429665,
+    "loss_nats_per_byte": 1.7378964267352985,
+    "perplexity_per_byte": 5.68537123996473,
+    "targets_scored": 437845,
+    "books": [
+      {
+        "book": "northanger-abbey",
+        "loss_nats_per_byte": 1.7378964267352985,
+        "perplexity_per_byte": 5.68537123996473,
+        "bits_per_byte": 2.507254556429665,
+        "targets_scored": 437845
+      }
+    ]
+  },
+  "context_probe": [
+    {
+      "book": "northanger-abbey",
+      "context_bytes": 8,
+      "bits_per_byte": 2.835234114874034,
+      "targets_scored": 256,
+      "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+    },
+    {
+      "book": "northanger-abbey",
+      "context_bytes": 32,
+      "bits_per_byte": 2.828608526245207,
+      "targets_scored": 256,
+      "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+    },
+    {
+      "book": "northanger-abbey",
+      "context_bytes": 128,
+      "bits_per_byte": 2.82861016008039,
+      "targets_scored": 256,
+      "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+    }
+  ],
+  "fixed_prompt": "It was a quiet evening, and ",
+  "sample": "It was a quiet evening, and plise all that ever seem derected were on the othing not it him it she arriate of the was those to morn is the from nom naterially is did frime after fealing her could an\nMirible of every, in much thr",
+  "checkpoint_sha256": "a072e9162a02f33463406ff2514caee37db1332679c6fce2c0bfdad238070b87"
+}

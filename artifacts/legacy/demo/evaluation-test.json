@@ -1,0 +1,20 @@
+{
+  "split": "test",
+  "checkpoint_step": 3000,
+  "parameters": 1816896,
+  "model": {
+    "loss_nats_per_character": 1.6649846555332979,
+    "perplexity_per_character": 5.285592144545843,
+    "bits_per_character": 2.402065105694108,
+    "targets_scored": 55769
+  },
+  "unigram_baseline": {
+    "loss_nats_per_character": 3.3619668142967902,
+    "perplexity_per_character": 28.8458695914366
+  },
+  "bigram_baseline": {
+    "loss_nats_per_character": 2.489535450326529,
+    "perplexity_per_character": 12.0556743598101
+  },
+  "corpus_sha256": "86c4e6aa9db7c042ec79f339dcb96d42b0075e16b8fc2e86bf0ca57e2dc565ed"
+}

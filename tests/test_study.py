@@ -137,6 +137,21 @@ def test_best_checkpoint_is_validation_selected_not_final(tmp_path):
     assert last["step"] == 4
 
 
+def test_final_checkpoint_recovers_missing_or_stale_summary(tmp_path):
+    data = fixture_corpus(tmp_path / "data")
+    plan = small_plan()
+    output = tmp_path / "run"
+    train_run(plan, "transformer", 7, data, output)
+    (output / "summary.json").unlink()
+    repaired = train_run(plan, "transformer", 7, data, output)
+    assert repaired["complete"] and repaired["step"] == plan["steps"]
+    assert repaired["trained_bytes"] == plan["steps"] * plan["batch_size"] * 8
+    write_json(output / "summary.json", {"complete": False, "step": 2})
+    repaired = train_run(plan, "transformer", 7, data, output)
+    assert json.loads((output / "summary.json").read_text()) == repaired
+    assert repaired["complete"] and repaired["step"] == plan["steps"]
+
+
 def test_final_test_is_locked_until_every_run_finishes(tmp_path):
     with pytest.raises(ValueError, match="every preregistered"):
         finalize_study(

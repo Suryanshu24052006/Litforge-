@@ -1,0 +1,62 @@
+{
+  "architecture": "transformer",
+  "seed": 17,
+  "parameters": 347200,
+  "selected_step": 1200,
+  "validation": {
+    "bits_per_byte": 2.7912885963403955,
+    "loss_nats_per_byte": 1.9347738206824723,
+    "perplexity_per_byte": 6.922478156912898,
+    "targets_scored": 467009,
+    "books": [
+      {
+        "book": "persuasion",
+        "loss_nats_per_byte": 1.9347738206824723,
+        "perplexity_per_byte": 6.922478156912898,
+        "bits_per_byte": 2.7912885963403955,
+        "targets_scored": 467009
+      }
+    ]
+  },
+  "test": {
+    "bits_per_byte": 2.7455335467921684,
+    "loss_nats_per_byte": 1.903058837091738,
+    "perplexity_per_byte": 6.706376814340205,
+    "targets_scored": 437845,
+    "books": [
+      {
+        "book": "northanger-abbey",
+        "loss_nats_per_byte": 1.903058837091738,
+        "perplexity_per_byte": 6.706376814340205,
+        "bits_per_byte": 2.7455335467921684,
+        "targets_scored": 437845
+      }
+    ]
+  },
+  "context_probe": [
+    {
+      "book": "northanger-abbey",
+      "context_bytes": 8,
+      "bits_per_byte": 3.0880796545108433,
+      "targets_scored": 256,
+      "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+    },
+    {
+      "book": "northanger-abbey",
+      "context_bytes": 32,
+      "bits_per_byte": 3.0676238230389075,
+      "targets_scored": 256,
+      "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+    },
+    {
+      "book": "northanger-abbey",
+      "context_bytes": 128,
+      "bits_per_byte": 3.911148872050065,
+      "targets_scored": 256,
+      "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+    }
+  ],
+  "fixed_prompt": "It was a quiet evening, and ",
+  "sample": "It was a quiet evening, and being all that and her mom to you wen con of inter, and the him it of harreate of the won the be to o avis te t thimilureanedin t ousppios agrcinfes s ailime hblfowateted s taplif teess, s\nigane ast r",
+  "checkpoint_sha256": "37c65d0a77261351fe3a9a2b88fcbcadf558664c240bc915c89b8261a9f75795"
+}

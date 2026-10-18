@@ -1,0 +1,73 @@
+{
+  "architecture": "transformer",
+  "seed": 17,
+  "protocol": {
+    "version": 1,
+    "name": "novel-generalization-v1",
+    "question": "How do nearly parameter-matched Transformer and GRU models generalize to an unseen Austen book under the same training-byte budget?",
+    "seeds": [
+      17,
+      42,
+      73
+    ],
+    "steps": 1200,
+    "batch_size": 16,
+    "learning_rate": 0.001,
+    "eval_every": 300,
+    "threads": 2,
+    "models": {
+      "transformer": {
+        "vocab_size": 256,
+        "context": 128,
+        "width": 112,
+        "heads": 4,
+        "layers": 2,
+        "dropout": 0.1
+      },
+      "gru": {
+        "vocab_size": 256,
+        "context": 128,
+        "width": 160,
+        "layers": 2,
+        "dropout": 0.1
+      }
+    },
+    "context_probe": {
+      "lengths": [
+        8,
+        32,
+        128
+      ],
+      "anchors": 256
+    },
+    "demo_seed": 42,
+    "selection": "lowest full-book validation bits per byte; no test-based seed or hyperparameter selection",
+    "budget_note": "matched training bytes and approximately matched parameter count; FLOPs and wall time are not matched",
+    "baselines": {
+      "ngram_order": 4,
+      "backoff_strength": 10.0,
+      "unigram_alpha": 0.1
+    }
+  },
+  "protocol_sha256": "dabdc1e35f9b7571ab96a3f6cac64022a4c6e5611ca6c1c551d4802326ad9497",
+  "dataset_sha256": "fd6403e1d1d186ba495713d95dcffa583ff249911e2b28b01da56f99b1b447bc",
+  "source": {
+    "files": {
+      "baselines.py": "409177e03813599cb4bff59140523d67c72427ad4c3a50493ce3bd78883c7849",
+      "books.py": "e3ffae4d33c7b13840eae6191f3414942a25540615e34681ddf878465975333f",
+      "model.py": "7e81aa00df266963bfbc22136fbf32317cbe4c440e70894fad522c4f580ee92e",
+      "study.py": "f2a6bd3af86588dc84144d5f5a6dd2b57f2a2f339ecaf106b5555419417d57e0",
+      "training.py": "1d422e8e5876093c58a7b0106bbbf1da6463b29c474e626aff5aa782ebba5a55",
+      "tokenizer.py": "7110730ff7c782c4c4d6eb858aea74a6a203293679311b01e48c5679f5a7a2b6"
+    },
+    "source_sha256": "cbb31c1879b025a18877a180b74a4180a9af9af21896e5b174e0b2946f4b906f",
+    "git_commit": "ae9641938e9236b5fffd754142c998b1de245ad6",
+    "python": "3.12.14",
+    "torch": "2.8.0+cpu"
+  },
+  "parameters": 347200,
+  "context": 128,
+  "trained_bytes_budget": 2457600,
+  "metric_unit": "UTF-8 byte",
+  "evaluation": "whole-book holdout; nonoverlapping windows"
+}

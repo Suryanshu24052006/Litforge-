@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "selection": "predeclared seed; lowest validation BPB checkpoint; no test-based selection",
+  "protocol_sha256": "dabdc1e35f9b7571ab96a3f6cac64022a4c6e5611ca6c1c551d4802326ad9497",
+  "models": {
+    "transformer": {
+      "path": "models/novel-transformer.pt",
+      "sha256": "dff9dd3ca18d56d91a15551dfc7032965dcac70c1315a9b0b3eea465c72654fd",
+      "bytes": 1396777,
+      "parameters": 347200,
+      "seed": 42,
+      "selected_step": 1200,
+      "dataset_sha256": "fd6403e1d1d186ba495713d95dcffa583ff249911e2b28b01da56f99b1b447bc",
+      "validation_bpb": 2.7638609475948264,
+      "test_bpb": 2.7161299008108557
+    },
+    "gru": {
+      "path": "models/novel-gru.pt",
+      "sha256": "380bf91208577da547f807cd00d4f2f2adb24266f564ddf3712b24fa86b792a9",
+      "bytes": 1405967,
+      "parameters": 350400,
+      "seed": 42,
+      "selected_step": 1200,
+      "dataset_sha256": "fd6403e1d1d186ba495713d95dcffa583ff249911e2b28b01da56f99b1b447bc",
+      "validation_bpb": 2.541121792111681,
+      "test_bpb": 2.4971446368319588
+    }
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "architecture": "transformer",
+  "seed": 73,
+  "parameters": 347200,
+  "selected_step": 1200,
+  "validation": {
+    "bits_per_byte": 2.772591201051613,
+    "loss_nats_per_byte": 1.921813773854238,
+    "perplexity_per_byte": 6.833341371920961,
+    "targets_scored": 467009,
+    "books": [
+      {
+        "book": "persuasion",
+        "loss_nats_per_byte": 1.921813773854238,
+        "perplexity_per_byte": 6.833341371920961,
+        "bits_per_byte": 2.772591201051613,
+        "targets_scored": 467009
+      }
+    ]
+  },
+  "test": {
+    "bits_per_byte": 2.7295212821601393,
+    "loss_nats_per_byte": 1.8919599810076675,
+    "perplexity_per_byte": 6.632355240488255,
+    "targets_scored": 437845,
+    "books": [
+      {
+        "book": "northanger-abbey",
+        "loss_nats_per_byte": 1.8919599810076675,
+        "perplexity_per_byte": 6.632355240488255,
+        "bits_per_byte": 2.7295212821601393,
+        "targets_scored": 437845
+      }
+    ]
+  },
+  "context_probe": [
+    {
+      "book": "northanger-abbey",
+      "context_bytes": 8,
+      "bits_per_byte": 3.091033499535075,
+      "targets_scored": 256,
+      "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+    },
+    {
+      "book": "northanger-abbey",
+      "context_bytes": 32,
+      "bits_per_byte": 3.034773653373747,
+      "targets_scored": 256,
+      "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+    },
+    {
+      "book": "northanger-abbey",
+      "context_bytes": 128,
+      "bits_per_byte": 3.1260726428825856,
+      "targets_scored": 256,
+      "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+    }
+  ],
+  "fixed_prompt": "It was a quiet evening, and ",
+  "sample": "It was a quiet evening, and being all that and her mod to\nyou were of the othing not the simiten or withir of the wo which a to\nof his the frectiom Mars Laste, she day griable he walllf her with the\nsitablie the she persittest r",
+  "checkpoint_sha256": "7426257c5dbe2c0498d0502ad3279024a67280079174c90040f8ccc57073a476"
+}

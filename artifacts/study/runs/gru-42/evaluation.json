@@ -1,0 +1,62 @@
+{
+  "architecture": "gru",
+  "seed": 42,
+  "parameters": 350400,
+  "selected_step": 1200,
+  "validation": {
+    "bits_per_byte": 2.541121792111681,
+    "loss_nats_per_byte": 1.7613714056616472,
+    "perplexity_per_byte": 5.8204140723336995,
+    "targets_scored": 467009,
+    "books": [
+      {
+        "book": "persuasion",
+        "loss_nats_per_byte": 1.7613714056616472,
+        "perplexity_per_byte": 5.8204140723336995,
+        "bits_per_byte": 2.541121792111681,
+        "targets_scored": 467009
+      }
+    ]
+  },
+  "test": {
+    "bits_per_byte": 2.4971446368319588,
+    "loss_nats_per_byte": 1.7308887644704607,
+    "perplexity_per_byte": 5.645669349655138,
+    "targets_scored": 437845,
+    "books": [
+      {
+        "book": "northanger-abbey",
+        "loss_nats_per_byte": 1.7308887644704607,
+        "perplexity_per_byte": 5.645669349655138,
+        "bits_per_byte": 2.4971446368319588,
+        "targets_scored": 437845
+      }
+    ]
+  },
+  "context_probe": [
+    {
+      "book": "northanger-abbey",
+      "context_bytes": 8,
+      "bits_per_byte": 2.7737711915848284,
+      "targets_scored": 256,
+      "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+    },
+    {
+      "book": "northanger-abbey",
+      "context_bytes": 32,
+      "bits_per_byte": 2.766797574564149,
+      "targets_scored": 256,
+      "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+    },
+    {
+      "book": "northanger-abbey",
+      "context_bytes": 128,
+      "bits_per_byte": 2.766797144607522,
+      "targets_scored": 256,
+      "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+    }
+  ],
+  "fixed_prompt": "It was a quiet evening, and ",
+  "sample": "It was a quiet evening, and plise all that and her more poon wether to geen and he would simet of hardlate of the was the dayter liver the from nom of she stongs. And agriet be she live heart his for in prie the she, in much thr",
+  "checkpoint_sha256": "380bf91208577da547f807cd00d4f2f2adb24266f564ddf3712b24fa86b792a9"
+}

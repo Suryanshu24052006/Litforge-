@@ -12,7 +12,7 @@ from .training import load_checkpoint, score_checkpoint, train, write_json
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Train a small Shakespeare-style language model from scratch"
+        description="Train, compare, and inspect small autoregressive language models"
     )
     commands = parser.add_subparsers(dest="command", required=True)
     prep = commands.add_parser(
@@ -33,6 +33,23 @@ def main():
     study.add_argument("--phase", choices=["all", "train", "evaluate"], default="all")
     study.add_argument("--architecture", choices=["transformer", "gru"])
     study.add_argument("--seed", type=int)
+    exporting = commands.add_parser(
+        "export-study", help="Publish run records and small, checksummed demo models"
+    )
+    exporting.add_argument("--study", default="runs/novel-study-v1")
+    exporting.add_argument("--root", default=".")
+    verifying = commands.add_parser(
+        "verify-models", help="Check the bundled model digests before running the demo"
+    )
+    verifying.add_argument("--root", default=".")
+    book_eval = commands.add_parser(
+        "evaluate-book", help="Reproduce a bundled model score on a verified book"
+    )
+    book_eval.add_argument("--checkpoint", default="models/novel-transformer.pt")
+    book_eval.add_argument("--data", default="data/novels")
+    book_eval.add_argument("--split", choices=["validation", "test"], default="test")
+    book_eval.add_argument("--output")
+    book_eval.add_argument("--threads", type=int, default=2)
     training = commands.add_parser(
         "train", help="Train a randomly initialized transformer"
     )
@@ -61,8 +78,8 @@ def main():
     generation = commands.add_parser(
         "generate", help="Sample a continuation from a trained model"
     )
-    generation.add_argument("--checkpoint", default="runs/cpu/best.pt")
-    generation.add_argument("--prompt", default="ROMEO:\n")
+    generation.add_argument("--checkpoint", default="models/novel-transformer.pt")
+    generation.add_argument("--prompt", default="It was a quiet evening, and ")
     generation.add_argument("--tokens", type=int, default=300)
     generation.add_argument("--temperature", type=float, default=0.8)
     generation.add_argument("--top-k", type=int, default=20)
@@ -74,7 +91,11 @@ def main():
         help="Use the simpler reference generation path",
     )
     serving = commands.add_parser("serve", help="Run a local writing demo and JSON API")
-    serving.add_argument("--checkpoint", default="runs/cpu/best.pt")
+    serving.add_argument("--checkpoint", default="models/novel-transformer.pt")
+    serving.add_argument("--compare", help="Optional second GRU checkpoint")
+    serving.add_argument(
+        "--study", help="Optional exported study JSON for the dashboard"
+    )
     serving.add_argument("--host", default="127.0.0.1")
     serving.add_argument("--port", type=int, default=8000)
     args = parser.parse_args()
@@ -89,6 +110,26 @@ def main():
             from .books import prepare_books
 
             print(json.dumps(prepare_books(args.data), indent=2))
+        elif args.command == "verify-models":
+            from .artifacts import verify_models
+
+            print(json.dumps(verify_models(args.root), indent=2))
+        elif args.command == "export-study":
+            from .artifacts import export_study
+
+            print(json.dumps(export_study(args.study, args.root), indent=2))
+        elif args.command == "evaluate-book":
+            from .books import load_books
+            from .study import evaluate_documents
+
+            model, _, checkpoint = load_checkpoint(args.checkpoint)
+            manifest, splits = load_books(args.data, include_test=args.split == "test")
+            if checkpoint.get("dataset_sha256") != manifest["dataset_sha256"]:
+                raise ValueError("Checkpoint and book corpus differ")
+            result = evaluate_documents(model, splits[args.split])
+            if args.output:
+                write_json(Path(args.output), result)
+            print(json.dumps(result, indent=2))
         elif args.command == "study":
             from .study import run_study
 
@@ -126,6 +167,17 @@ def main():
             from .web import create_app
 
             torch.set_num_threads(2)
-            uvicorn.run(create_app(args.checkpoint), host=args.host, port=args.port)
+            comparison = args.compare
+            if (
+                comparison is None
+                and Path(args.checkpoint).resolve()
+                == Path("models/novel-transformer.pt").resolve()
+            ):
+                comparison = "models/novel-gru.pt"
+            uvicorn.run(
+                create_app(args.checkpoint, comparison, args.study),
+                host=args.host,
+                port=args.port,
+            )
     except (ValueError, OSError, RuntimeError) as exc:
         parser.exit(1, f"Error: {exc}\n")

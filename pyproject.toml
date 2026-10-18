@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "litforge"
-version = "0.1.0"
-description = "An explainable decoder-only transformer trained from scratch on Shakespeare."
+version = "0.2.0"
+description = "A reproducible small-model lab comparing attention, recurrence, and byte n-grams."
 requires-python = ">=3.11,<3.14"
 dependencies = ["torch==2.8.0", "numpy>=1.26,<3", "fastapi>=0.115,<1", "uvicorn>=0.34,<1"]
 

@@ -1,56 +1,126 @@
-"""Local demo; generation is serialized to bound CPU load and preserve model mode."""
+"""Local experiment dashboard, model comparison, and request-scoped inspection."""
 
+import json
 import threading
 import time
+from pathlib import Path
+from typing import Literal
 
 import torch
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
+from .artifacts import verify_models
+from .inspection import inspect_model
+from .tokenizer import ByteTokenizer
 from .training import load_checkpoint
 
 
 class GenerateRequest(BaseModel):
-    prompt: str = Field(default="ROMEO:\n", min_length=1, max_length=512)
+    prompt: str = Field(
+        default="It was a quiet evening, and ", min_length=1, max_length=512
+    )
     max_new_tokens: int = Field(default=200, ge=1, le=512)
     temperature: float = Field(default=0.8, ge=0.1, le=2.0)
     top_k: int = Field(default=20, ge=1, le=256)
     seed: int = Field(default=42, ge=0, le=2**32 - 1)
+    model: Literal["primary", "gru"] = "primary"
 
 
-def create_app(checkpoint_path):
-    model, tokenizer, checkpoint = load_checkpoint(checkpoint_path)
+class InspectRequest(BaseModel):
+    prompt: str = Field(min_length=1, max_length=512)
+    model: Literal["primary", "gru"] = "primary"
+    layer: int = Field(default=0, ge=0)
+    head: int = Field(default=0, ge=0)
+
+
+def create_app(checkpoint_path, comparison_path=None, study_path=None):
+    root = Path(__file__).resolve().parents[1]
+    if Path(checkpoint_path).resolve().parent == (root / "models").resolve():
+        verify_models(root)
+    models = {"primary": load_checkpoint(checkpoint_path)}
+    if comparison_path:
+        models["gru"] = load_checkpoint(comparison_path)
+    study_path = Path(study_path) if study_path else root / "artifacts/study/study.json"
     lock = threading.Lock()
     app = FastAPI(
-        title="LitForge",
-        description="A small transformer trained from scratch; experimental text generation.",
+        title="LitForge — Small Model Lab",
+        description="A reproducible whole-book comparison of attention, recurrence, and byte n-grams.",
     )
+    app.mount(
+        "/static",
+        StaticFiles(directory=Path(__file__).parent / "static"),
+        name="static",
+    )
+
+    def selected(name):
+        if name not in models:
+            raise HTTPException(404, "This comparison model is not loaded")
+        return models[name]
 
     @app.get("/", response_class=HTMLResponse)
     def index():
-        return HTML
+        return (Path(__file__).parent / "static/index.html").read_text()
 
     @app.get("/health")
     def health():
-        return {
+        model, tokenizer, checkpoint = models["primary"]
+        records = []
+        for name, (item, codec, weights) in models.items():
+            records.append(
+                {
+                    "id": name,
+                    "architecture": weights.get("architecture", "transformer"),
+                    "parameters": item.parameter_count,
+                    "context": item.config.context,
+                    "unit": "byte" if isinstance(codec, ByteTokenizer) else "character",
+                    "layers": item.config.layers,
+                    "heads": getattr(item.config, "heads", 0),
+                }
+            )
+        result = {
             "status": "ok",
             "parameters": model.parameter_count,
             "training_step": checkpoint["step"],
-            "context_characters": model.config.context,
+            "context_tokens": model.config.context,
+            "models": records,
         }
+        result[
+            "context_bytes"
+            if isinstance(tokenizer, ByteTokenizer)
+            else "context_characters"
+        ] = model.config.context
+        return result
+
+    @app.get("/study")
+    def study():
+        if not study_path.exists():
+            raise HTTPException(
+                503,
+                "Study results are not available; finish and export the experiment first",
+            )
+        result = json.loads(study_path.read_text())
+        histories = {}
+        for architecture in result["protocol"]["models"]:
+            for seed in result["protocol"]["seeds"]:
+                name = f"{architecture}-{seed}"
+                path = study_path.parent / "runs" / name / "history.json"
+                if path.is_file():
+                    histories[name] = json.loads(path.read_text())
+        result["histories"] = histories
+        return result
 
     @app.post("/generate")
     def generate(request: GenerateRequest):
+        model, tokenizer, _ = selected(request.model)
         try:
             tokens = torch.tensor([tokenizer.encode(request.prompt)], dtype=torch.long)
         except ValueError as exc:
             raise HTTPException(422, str(exc)) from exc
-        # Return a clear busy response instead of accumulating unbounded work.
         if not lock.acquire(blocking=False):
-            raise HTTPException(
-                429, "The model is generating another passage. Try again shortly."
-            )
+            raise HTTPException(429, "The model is busy. Try again shortly.")
         try:
             start = time.perf_counter()
             result = model.generate(
@@ -60,45 +130,39 @@ def create_app(checkpoint_path):
                 request.top_k,
                 request.seed,
             )
-            text = tokenizer.decode(result[0].tolist())
-            seconds = time.perf_counter() - start
+            generated = result[0].tolist()
+            if isinstance(tokenizer, ByteTokenizer):
+                continuation = tokenizer.continuation(request.prompt, generated)
+                text = request.prompt + continuation
+            else:
+                text = tokenizer.decode(generated)
+                continuation = text[len(request.prompt) :]
             return {
                 "text": text,
-                "continuation": text[len(request.prompt) :],
-                "generated_characters": request.max_new_tokens,
-                "seconds": seconds,
+                "continuation": continuation,
+                "generated_characters": len(continuation),
+                "generated_tokens": request.max_new_tokens,
+                "token_unit": "byte"
+                if isinstance(tokenizer, ByteTokenizer)
+                else "character",
+                "seconds": time.perf_counter() - start,
+                "model": request.model,
             }
         finally:
             lock.release()
 
+    @app.post("/inspect")
+    def inspect(request: InspectRequest):
+        model, tokenizer, _ = selected(request.model)
+        if not lock.acquire(blocking=False):
+            raise HTTPException(429, "The model is busy. Try again shortly.")
+        try:
+            return inspect_model(
+                model, tokenizer, request.prompt, request.layer, request.head
+            )
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from exc
+        finally:
+            lock.release()
+
     return app
-
-
-HTML = """<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>LitForge — Writing Lab</title><style>
-:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#101218;color:#e9e7e1;font:17px system-ui,sans-serif}
-main{max-width:920px;margin:70px auto;padding:24px}.eyebrow{color:#d8b77e;letter-spacing:3px;font-size:12px}
-h1{font:64px Georgia,serif;margin:18px 0}p{color:#aaaebc;line-height:1.6}label{display:block;margin:20px 0 8px}
-textarea,select{background:#191d27;color:inherit;border:1px solid #424859;border-radius:8px;padding:14px;font:inherit;width:100%}
-textarea{min-height:110px;resize:vertical}.controls{display:flex;gap:20px}.controls>div{flex:1}input{width:100%}
-button{margin:24px 0;padding:13px 26px;background:#d8b77e;border:0;border-radius:7px;font:600 16px system-ui;color:#17191d;cursor:pointer}
-button:disabled{opacity:.5;cursor:wait}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:21px/1.7 Georgia,serif;background:#191d27;border-radius:10px;padding:26px;min-height:160px}
-#status{color:#aaaebc;font-size:14px}footer{margin-top:35px;color:#aaaebc;font-size:13px}@media(max-width:600px){main{margin:20px auto}h1{font-size:48px}.controls{flex-direction:column;gap:0}}
-</style></head><body><main><div class="eyebrow">THE WRITING LAB</div><h1>LitForge</h1>
-<p>Give a small, experimental language model an opening line. See how it continues in the style of Shakespeare.</p>
-<form id="form"><label for="prompt">Your opening</label><textarea id="prompt" maxlength="512" required>ROMEO:
-</textarea><div class="controls"><div><label for="temperature">Creativity: <span id="temp-value">0.8</span></label>
-<input id="temperature" type="range" min="0.2" max="1.4" step="0.1" value="0.8"></div>
-<div><label for="length">Passage length</label><select id="length"><option value="100">Short · 100 characters</option><option value="200" selected>Medium · 200 characters</option><option value="400">Long · 400 characters</option></select></div></div>
-<button id="submit" type="submit">Continue the passage</button></form><div id="status" role="status" aria-live="polite"></div>
-<pre id="output">Your passage will appear here.</pre><footer>Trained from scratch on public-domain text. Output may contain invented words or incoherent passages.</footer>
-<script>
-const form=document.getElementById('form'),button=document.getElementById('submit'),status=document.getElementById('status'),output=document.getElementById('output');
-document.getElementById('temperature').oninput=e=>document.getElementById('temp-value').textContent=e.target.value;
-form.onsubmit=async e=>{e.preventDefault();button.disabled=true;status.textContent='Writing…';try{
-const response=await fetch('/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:document.getElementById('prompt').value,max_new_tokens:Number(document.getElementById('length').value),temperature:Number(document.getElementById('temperature').value)})});
-const data=await response.json();if(!response.ok)throw new Error(typeof data.detail==='string'?data.detail:'Please check the prompt and settings.');
-output.textContent=data.text;status.textContent=`${data.generated_characters} characters generated in ${data.seconds.toFixed(1)} seconds.`;
-}catch(error){status.textContent=error.message;}finally{button.disabled=false;}};
-</script></main></body></html>"""

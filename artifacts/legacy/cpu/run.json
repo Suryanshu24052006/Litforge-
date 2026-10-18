@@ -1,0 +1,28 @@
+{
+  "model": {
+    "vocab_size": 65,
+    "context": 96,
+    "width": 128,
+    "heads": 4,
+    "layers": 4,
+    "dropout": 0.1
+  },
+  "parameters": 813952,
+  "seed": 42,
+  "device": "cpu",
+  "torch_version": "2.8.0+cpu",
+  "corpus_sha256": "86c4e6aa9db7c042ec79f339dcb96d42b0075e16b8fc2e86bf0ca57e2dc565ed",
+  "split_tokens": {
+    "train": 1003854,
+    "validation": 55770,
+    "test": 55770
+  },
+  "steps": 600,
+  "batch_size": 8,
+  "learning_rate": 0.001,
+  "threads": 2,
+  "initialization": "random; no pretrained weights",
+  "precision": "float32",
+  "optimizer": "AdamW",
+  "gradient_clip_norm": 1.0
+}

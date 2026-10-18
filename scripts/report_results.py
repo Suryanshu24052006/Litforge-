@@ -1,54 +1,61 @@
-"""Publish measured run artifacts as a portable Markdown report."""
+"""Render the legacy character-model report from its actual run metadata."""
 
 import argparse
 import json
 from pathlib import Path
 
-parser = argparse.ArgumentParser()
-parser.add_argument(
-    "--runs", nargs="+", type=Path, default=[Path("runs/cpu"), Path("runs/demo")]
-)
-parser.add_argument("--output", type=Path, default=Path("docs/RESULTS.md"))
-args = parser.parse_args()
-lines = [
-    "# Measured results",
-    "",
-    "These measurements come from training the models in this workspace. Both started from random weights and used seed 42. The best checkpoint was selected using validation loss; the test section was scored separately.",
-    "",
-    "| Run | Parameters | Steps | Training time | Initial → best validation loss | Test perplexity / character | Unigram baseline | Bigram baseline |",
-    "|---|---:|---:|---:|---:|---:|---:|---:|",
-]
-for path in args.runs:
-    run = json.loads((path / "run.json").read_text())
-    summary = json.loads((path / "summary.json").read_text())
-    result = json.loads((path / "evaluation-test.json").read_text())
-    lines.append(
-        f"| {path.name} | {run['parameters']:,} | {run['steps']:,} | {summary['training_seconds']:.1f} s | "
-        f"{summary['initial_validation']['loss_nats_per_character']:.3f} → {summary['best_validation_loss']:.3f} | "
-        f"{result['model']['perplexity_per_character']:.2f} | {result['unigram_baseline']['perplexity_per_character']:.2f} | "
-        f"{result['bigram_baseline']['perplexity_per_character']:.2f} |"
+
+def render_report(paths, output):
+    lines = [
+        "# Legacy Shakespeare character experiment",
+        "",
+        "These are the original single-run experiments. The current whole-book study is in [STUDY.md](STUDY.md). Scores use different data and token units and cannot be compared directly.",
+        "",
+        "Checkpoints were selected on validation loss; the test section was scored separately.",
+        "",
+        "| Run | Seed | Parameters | Steps | Training time | Initial → best validation loss | Test perplexity / character | Unigram | Bigram | Scored targets |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+    ]
+    for path in map(Path, paths):
+        run = json.loads((path / "run.json").read_text())
+        summary = json.loads((path / "summary.json").read_text())
+        result = json.loads((path / "evaluation-test.json").read_text())
+        if result["split"] != "test" or result["corpus_sha256"] != run["corpus_sha256"]:
+            raise ValueError(
+                "Evaluation split or corpus does not match the training run"
+            )
+        lines.append(
+            f"| {path.name} | {run['seed']} | {run['parameters']:,} | {run['steps']:,} | {summary['training_seconds']:.1f} s | "
+            f"{summary['initial_validation']['loss_nats_per_character']:.3f} → {summary['best_validation_loss']:.3f} | "
+            f"{result['model']['perplexity_per_character']:.2f} | {result['unigram_baseline']['perplexity_per_character']:.2f} | "
+            f"{result['bigram_baseline']['perplexity_per_character']:.2f} | {result['model']['targets_scored']:,} |"
+        )
+    lines += [
+        "",
+        "Unigram and bigram counts use only training text. Training time excludes installation, download, initial validation, and final test evaluation; it includes periodic validation and checkpoint writes. These are CPU runs, not a controlled hardware benchmark.",
+        "",
+        "![Original demo learning curve](learning-curve.svg)",
+        "",
+        "The contiguous split can share works and repeated passages across sections. Lower character perplexity supports learning local patterns on this corpus, not general writing or reasoning ability. Raw legacy metadata is retained in `artifacts/legacy/`; original weights remain local under ignored `runs/`.",
+        "",
+        "Refresh from completed local runs with `python scripts/report_results.py --runs runs/cpu runs/demo`.",
+        "",
+    ]
+    output = Path(output)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text("\n".join(lines))
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--runs", nargs="+", type=Path, default=[Path("runs/cpu"), Path("runs/demo")]
     )
-    assert result["split"] == "test" and result["corpus_sha256"] == run["corpus_sha256"]
-lines += [
-    "",
-    "The test section contains 55,769 scored next-character targets. The unigram baseline is fitted only on training frequencies. Training time excludes corpus download, dependency installation, initial validation, and final test evaluation; it includes periodic validation and checkpoint writes. These are single CPU runs, not a controlled hardware benchmark.",
-    "",
-    "![Demo run learning curve](learning-curve.svg)",
-    "",
-    "## Interpretation",
-    "",
-    "Lower held-out perplexity than a unigram baseline shows that the transformer learned contextual character patterns. It does not establish fluent writing or general-purpose reasoning. The corpus is small, uses one author, and is split by contiguous sections rather than by independent works. Samples can contain malformed words, repetition, and incoherence.",
-    "",
-    "## Reproduce",
-    "",
-    "The exact commands are in the root README. Full configurations, corpus digests, training logs, evaluations, and checkpoints remain under `runs/`. To refresh this report after both runs finish:",
-    "",
-    "```bash",
-    "uv run --frozen --extra plots python scripts/plot_run.py runs/demo",
-    "uv run --frozen python scripts/report_results.py",
-    "```",
-    "",
-]
-args.output.parent.mkdir(parents=True, exist_ok=True)
-args.output.write_text("\n".join(lines))
-print(args.output)
+    parser.add_argument("--output", type=Path, default=Path("docs/RESULTS.md"))
+    args = parser.parse_args()
+    render_report(args.runs, args.output)
+    print(args.output)
+
+
+if __name__ == "__main__":
+    main()

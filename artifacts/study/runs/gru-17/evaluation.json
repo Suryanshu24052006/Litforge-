@@ -1,0 +1,62 @@
+{
+  "architecture": "gru",
+  "seed": 17,
+  "parameters": 350400,
+  "selected_step": 1200,
+  "validation": {
+    "bits_per_byte": 2.5378401383624865,
+    "loss_nats_per_byte": 1.759096736617819,
+    "perplexity_per_byte": 5.807189602968724,
+    "targets_scored": 467009,
+    "books": [
+      {
+        "book": "persuasion",
+        "loss_nats_per_byte": 1.759096736617819,
+        "perplexity_per_byte": 5.807189602968724,
+        "bits_per_byte": 2.5378401383624865,
+        "targets_scored": 467009
+      }
+    ]
+  },
+  "test": {
+    "bits_per_byte": 2.511230064678577,
+    "loss_nats_per_byte": 1.7406520390693248,
+    "perplexity_per_byte": 5.701059524565084,
+    "targets_scored": 437845,
+    "books": [
+      {
+        "book": "northanger-abbey",
+        "loss_nats_per_byte": 1.7406520390693248,
+        "perplexity_per_byte": 5.701059524565084,
+        "bits_per_byte": 2.511230064678577,
+        "targets_scored": 437845
+      }
+    ]
+  },
+  "context_probe": [
+    {
+      "book": "northanger-abbey",
+      "context_bytes": 8,
+      "bits_per_byte": 2.824553368818344,
+      "targets_scored": 256,
+      "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+    },
+    {
+      "book": "northanger-abbey",
+      "context_bytes": 32,
+      "bits_per_byte": 2.8158869910587163,
+      "targets_scored": 256,
+      "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+    },
+    {
+      "book": "northanger-abbey",
+      "context_bytes": 128,
+      "bits_per_byte": 2.8158871200457045,
+      "targets_scored": 256,
+      "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+    }
+  ],
+  "fixed_prompt": "It was a quiet evening, and ",
+  "sample": "It was a quiet evening, and plise all that every comminecty of to con the other which the main of harriate of the was the dayter liver the from not Mars all be supcos agriatfes, feal were affeed the\nsiriplied a she some much tha",
+  "checkpoint_sha256": "5122ca24f6bd2da3f4c6dabc8d4c6d3604b359d8c4c18ba4f050d133c7dcb54e"
+}

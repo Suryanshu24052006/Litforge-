@@ -1,0 +1,12 @@
+{
+  "initial_validation": {
+    "loss_nats_per_character": 4.185886843853588,
+    "perplexity_per_character": 65.75178663559203,
+    "bits_per_character": 6.038958191349926,
+    "targets_scored": 55769
+  },
+  "best_validation_loss": 2.3676049484962323,
+  "best_step": 600,
+  "training_seconds": 32.78107763600008,
+  "training_tokens": 460800
+}

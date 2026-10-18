@@ -1,0 +1,62 @@
+{
+  "architecture": "transformer",
+  "seed": 42,
+  "parameters": 347200,
+  "selected_step": 1200,
+  "validation": {
+    "bits_per_byte": 2.7638609475948264,
+    "loss_nats_per_byte": 1.9157624232850925,
+    "perplexity_per_byte": 6.792115290261388,
+    "targets_scored": 467009,
+    "books": [
+      {
+        "book": "persuasion",
+        "loss_nats_per_byte": 1.9157624232850925,
+        "perplexity_per_byte": 6.792115290261388,
+        "bits_per_byte": 2.7638609475948264,
+        "targets_scored": 467009
+      }
+    ]
+  },
+  "test": {
+    "bits_per_byte": 2.7161299008108557,
+    "loss_nats_per_byte": 1.8826777827816086,
+    "perplexity_per_byte": 6.571077241677664,
+    "targets_scored": 437845,
+    "books": [
+      {
+        "book": "northanger-abbey",
+        "loss_nats_per_byte": 1.8826777827816086,
+        "perplexity_per_byte": 6.571077241677664,
+        "bits_per_byte": 2.7161299008108557,
+        "targets_scored": 437845
+      }
+    ]
+  },
+  "context_probe": [
+    {
+      "book": "northanger-abbey",
+      "context_bytes": 8,
+      "bits_per_byte": 3.105650305031905,
+      "targets_scored": 256,
+      "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+    },
+    {
+      "book": "northanger-abbey",
+      "context_bytes": 32,
+      "bits_per_byte": 3.029452531653883,
+      "targets_scored": 256,
+      "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+    },
+    {
+      "book": "northanger-abbey",
+      "context_bytes": 128,
+      "bits_per_byte": 3.0964829418103137,
+      "targets_scored": 256,
+      "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+    }
+  ],
+  "fixed_prompt": "It was a quiet evening, and ",
+  "sample": "It was a quiet evening, and being all that be\nferect ireposed wer con the ot him not the simite to arrraie of the wo which\nspter livish the cartion of and on of him, and comf she a live her could\nand in prie the she persition ar",
+  "checkpoint_sha256": "dff9dd3ca18d56d91a15551dfc7032965dcac70c1315a9b0b3eea465c72654fd"
+}

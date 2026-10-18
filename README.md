@@ -1,97 +1,101 @@
-# LitForge
+# LitForge — Small Model Lab
 
-LitForge is a small language model that continues text in the style of Shakespeare. You give it an opening such as `ROMEO:`, and it writes one character at a time.
+[![tests](https://github.com/Suryanshu24052006/Litforge-/actions/workflows/ci.yml/badge.svg)](https://github.com/Suryanshu24052006/Litforge-/actions/workflows/ci.yml)
 
-I built this project to make the mechanics of a language model easier to study: the tokenizer, attention, training loop, and generation code are all here. The larger model has **1.82 million parameters** and was trained from random weights on a CPU.
+**Does attention beat recurrence when both models get the same small training budget?**
 
-## Try the trained model
+LitForge trains a Transformer and a GRU from random weights, then evaluates them on an entire book they never trained on. It includes a controlled experiment, train-only n-gram baselines, two runnable checkpoints, and a dashboard for inspecting predictions. Everything runs locally on a CPU; inference needs no API key.
 
-From the prepared workspace:
+The result surprised me: **the GRU beat the Transformer, and a 4-gram baseline beat both**. The useful outcome is an experiment you can check and explain, including its limitations.
 
-```bash
-cd /workspace/litforge
-.venv/bin/python -m litforge serve --checkpoint runs/demo/best.pt
-```
+## Try it from a fresh clone
 
-This starts the writing demo and API on local port 8000. To generate a passage in the terminal:
+Install [uv](https://docs.astral.sh/uv/), then:
 
 ```bash
-.venv/bin/python -m litforge generate --checkpoint runs/demo/best.pt \
-  --prompt $'ROMEO:\n' --tokens 200 --temperature 0.7
-```
-
-If you extracted the project archive on another machine, first install [uv](https://docs.astral.sh/uv/) and run `uv sync --frozen --extra dev`. Python 3.11–3.13 is supported; development and testing used Python 3.12. CPU PyTorch is selected in the lockfile.
-
-## What the model learns
-
-During training, an example looks like this:
-
-```text
-input:   R O M E
-target:  O M E O
-```
-
-Each position predicts the following character. Attention lets it use earlier characters, while a causal mask keeps future characters hidden. The error is measured with cross-entropy, and AdamW updates the weights. At generation time, the model samples a character, adds it to the prompt, and repeats.
-
-Temperature controls how spread out the probabilities are. Top-k sampling considers only the most likely candidates. The model has a short context window: 128 characters in the larger run.
-
-## Results
-
-| Model | Parameters | Test perplexity per character |
-|---|---:|---:|
-| Character-frequency baseline | — | 28.85 |
-| Previous-character baseline (bigram) | — | 12.06 |
-| Quick training run | 813,952 | 10.75 |
-| Larger training run | 1,816,896 | **5.29** |
-
-Lower perplexity means the model assigns higher probabilities to the held-out text. It is not an accuracy percentage. These results use contiguous sections of one small Shakespeare corpus, so they do not establish performance on other authors or tasks.
-
-See the [learning curve and training results](docs/RESULTS.md), [data source](DATA.md), and [model card](docs/MODEL_CARD.md).
-
-## Making it faster
-
-Generation reuses earlier attention keys and values while the context grows. When the window fills and slides, the cache is rebuilt to preserve the original model's predictions. `generate --no-cache` keeps the original, simpler path available for comparison.
-
-Training batches are gathered in one tensor operation instead of a Python loop over examples. The samples and their next-character targets stay the same.
-
-The [performance measurements](docs/PERFORMANCE.md) include short passages, passages that cross the context limit, and a full-context prompt. The benefit depends on the prompt and output length; batch-loading speed is not the same as overall training speed.
-
-## Train a new run
-
-```bash
+git clone https://github.com/Suryanshu24052006/Litforge-.git
+cd Litforge-
 uv sync --frozen --extra dev
-uv run --frozen python -m litforge prepare
-uv run --frozen python -m litforge train --output runs/my-first-run
-uv run --frozen python -m litforge evaluate \
-  --checkpoint runs/my-first-run/best.pt --output runs/my-first-run/evaluation-test.json
+uv run --frozen python -m litforge verify-models
+uv run --frozen python -m litforge serve
 ```
 
-Training refuses to overwrite a nonempty run directory. `best.pt` is selected using validation loss; `last.pt` saves the final weights. The test section is scored separately. Checkpoints include the vocabulary, model configuration, corpus hash, and weights. Exact training resumption is not implemented.
+Open **http://127.0.0.1:8000**. Both small trained models are committed under `models/`; no download or training is needed after dependency installation. Python 3.11–3.13 is supported; measured runs used Python 3.12 and CPU PyTorch 2.8.0.
 
-To reproduce the larger experiment, use `--steps 3000 --batch-size 16 --context 128 --width 192 --heads 6 --layers 4 --threads 4 --eval-every 300 --output runs/my-larger-run`. The [run records](runs/demo/run.json) contain the original settings. GPU training needs a CUDA-enabled PyTorch environment and has not been tested here.
+The three views show the experiment, let you sample either model, and display actual next-byte probabilities and a selected causal attention head. The GRU view explains why it has no attention matrix. Swagger API documentation is at `/docs`.
 
-## Understand the code
+![Experiment dashboard](docs/dashboard.png)
 
-Read these in order:
-
-1. `litforge/tokenizer.py`: how characters become numbers.
-2. `litforge/data.py`: how text becomes input/target pairs.
-3. `litforge/model.py`: embeddings, attention, transformer blocks, and generation.
-4. `litforge/training.py`: optimization, validation, and baselines.
-5. `tests/test_model.py`: what must remain true when the implementation changes.
-
-Start with `forward()` and the uncached generation path. Read the cache methods once the basic model makes sense. The [interview guide](docs/INTERVIEW.md) follows the same order and includes questions and small exercises.
-
-## Checks and limits
+Terminal generation works too:
 
 ```bash
-uv run --frozen --extra dev pytest -q
-uv run --frozen --extra dev ruff check .
-uv run --frozen python scripts/benchmark.py
+uv run --frozen python -m litforge generate --prompt "It was a quiet evening, and " --tokens 100
+uv run --frozen python -m litforge generate --checkpoint models/novel-gru.pt --top-k 1
 ```
 
-The tests cover causal masking, learning, label shifting, cache equivalence, context-window boundaries, checkpoint reloads, evaluation accounting, and API generation.
+These models continue text; they do not follow instructions or answer questions reliably. Samples still contain invented words and awkward sentences.
 
-Expect invented words, repetition, and awkward sentences. This is a text-continuation model with a small corpus and vocabulary. Unknown prompt characters are rejected. The local server handles one generation at a time, caps output at 512 characters, and returns HTTP 429 when busy.
+## The experiment and its result
 
-Run artifacts live under `runs/`; downloaded text lives under `data/`. Both are excluded from Git. Plot a run with `uv run --frozen --extra plots python scripts/plot_run.py runs/demo`.
+Train on *Pride and Prejudice*, *Sense and Sensibility*, and *Emma*. Select checkpoints on *Persuasion*. Score *Northanger Abbey* after all six planned runs finish. Each neural model gets **2,457,600 sampled training bytes per seed**, a 128-byte context, and the same optimizer recipe. Seeds are 17, 42, and 73. The parameter counts differ by less than 1%; compute and wall time are not matched.
+
+| Model | Parameters | Test bits per byte ↓ |
+|---|---:|---:|
+| Unigram | — | 4.4973 |
+| Bigram | — | 3.4906 |
+| 3-gram | — | 2.8097 |
+| **4-gram** | — | **2.2946** |
+| Transformer | 347,200 | 2.7304 ± 0.0147 |
+| GRU | 350,400 | 2.5052 ± 0.0073 |
+
+Neural results are mean ± sample standard deviation across three training seeds, not confidence intervals. Every full-book score covers the same **437,845 next-byte targets**. N-grams fit all training text; their exposure and compute are not matched to neural optimization.
+
+BPB is `average negative log probability / log(2)`: lower means less surprise at the text that actually occurred. It is not accuracy or a writing-quality score. At this budget, local frequency counts are strong. This does not establish that n-grams or GRUs are generally better than Transformers.
+
+The context diagnostic uses the same 256 target positions with 8, 32, and 128 input bytes. More context did **not** consistently improve the Transformer. Resetting learned position indices is a confound, and these sampled scores differ from the full-book evaluation.
+
+See the [full study and fixed-prompt samples](docs/STUDY.md), [raw per-seed records](artifacts/study/), [model card](docs/MODEL_CARD.md), and [data provenance](DATA.md).
+
+## Engineering worth inspecting
+
+- **Controlled sampling:** a separate RNG gives both architectures identical training windows for each seed. Windows never cross books. Checkpoint selection and the demo seed are fixed before test scoring.
+- **Reproducible runs:** pinned book revisions, raw and normalized hashes, a cross-split exact-paragraph audit, frozen protocol, source digests, and recorded software versions.
+- **Exact CPU resumption:** optimizer, model, batch RNG, dropout RNG, schedule position, and validation history are restored. Mismatched data, protocol, code, or software are rejected.
+- **Inference:** tied embeddings, a reference generation path, and cached generation checked across context-window boundaries. The cache rebuilds when learned positions shift.
+- **Runnable evidence:** checksummed inference weights, offline frontend assets, exported measurements, CI, and workflow tests that train, resume, evaluate, export, and serve tiny real models.
+
+The Transformer structure, study workflow, data processing, and evaluation are implemented here. PyTorch provides tensors, autograd, attention kernels, and `nn.GRU`. [References and attribution](docs/REFERENCES.md) distinguish established methods from this project's work.
+
+## Reproduce or extend the study
+
+```bash
+uv run --frozen python -m litforge prepare-books
+uv run --frozen python -m litforge study --output runs/reproduced-study
+# Re-running the same command resumes compatible saved runs.
+uv run --frozen python -m litforge export-study --study runs/reproduced-study
+```
+
+The [frozen protocol](experiments/novels.json) was committed before training. All six neural runs took about 14 minutes of summed training wall time, using two CPU threads per run. Workers can run concurrently; elapsed time depends on hardware and contention. Timing includes periodic validation and checkpoint writes, excluding initial validation and final test scoring. The experiment uses float32 on CPU. CUDA training for this workflow has not been validated.
+
+To check a bundled model's score without retraining:
+
+```bash
+uv run --frozen python -m litforge evaluate-book --checkpoint models/novel-gru.pt
+```
+
+Use a copied plan and a new output directory for new seeds or budgets. Do not retune the current study against its already opened test book. Another author and additional held-out books would make a stronger follow-up.
+
+## Checks and code tour
+
+```bash
+uv run --frozen --extra dev ruff check .
+uv run --frozen --extra dev pytest -q
+uv run --frozen --extra plots python scripts/plot_study.py
+uv run --frozen python scripts/package_project.py
+```
+
+Start with `tokenizer.py` → `books.py` → `model.py` → `study.py`. `baselines.py` implements interpolated byte n-grams; `inspection.py` exposes actual probabilities and attention; `web.py` serves the lab. The [interview guide](docs/INTERVIEW.md) follows a training example through this path and includes resume wording and a five-minute demo.
+
+The suite checks causal isolation, coverage and split integrity, best-checkpoint selection, exact resumption, cached/reference equivalence, export integrity, inspection, and both model APIs. The local server handles one inference request at a time and caps outputs at 512 tokens; it is not a multi-user production service.
+
+The original Shakespeare experiment and optimization measurements are preserved in [legacy results](docs/RESULTS.md), [performance measurements](docs/PERFORMANCE.md), and [raw legacy records](artifacts/legacy/). Those character-level scores are not comparable to this byte-level study. Downloaded texts and full training states stay in ignored `data/` and `runs/`; only the two small inference checkpoints are bundled.

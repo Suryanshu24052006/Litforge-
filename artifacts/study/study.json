@@ -1,0 +1,590 @@
+{
+  "protocol": {
+    "version": 1,
+    "name": "novel-generalization-v1",
+    "question": "How do nearly parameter-matched Transformer and GRU models generalize to an unseen Austen book under the same training-byte budget?",
+    "seeds": [
+      17,
+      42,
+      73
+    ],
+    "steps": 1200,
+    "batch_size": 16,
+    "learning_rate": 0.001,
+    "eval_every": 300,
+    "threads": 2,
+    "models": {
+      "transformer": {
+        "vocab_size": 256,
+        "context": 128,
+        "width": 112,
+        "heads": 4,
+        "layers": 2,
+        "dropout": 0.1
+      },
+      "gru": {
+        "vocab_size": 256,
+        "context": 128,
+        "width": 160,
+        "layers": 2,
+        "dropout": 0.1
+      }
+    },
+    "context_probe": {
+      "lengths": [
+        8,
+        32,
+        128
+      ],
+      "anchors": 256
+    },
+    "demo_seed": 42,
+    "selection": "lowest full-book validation bits per byte; no test-based seed or hyperparameter selection",
+    "budget_note": "matched training bytes and approximately matched parameter count; FLOPs and wall time are not matched",
+    "baselines": {
+      "ngram_order": 4,
+      "backoff_strength": 10.0,
+      "unigram_alpha": 0.1
+    }
+  },
+  "protocol_sha256": "dabdc1e35f9b7571ab96a3f6cac64022a4c6e5611ca6c1c551d4802326ad9497",
+  "dataset": {
+    "version": 1,
+    "author": "Jane Austen",
+    "tokenization": "UTF-8 bytes, fixed vocabulary 256",
+    "normalization": "strip UTF-8 BOM; CRLF/CR to LF; remove Gutenberg header/footer; trim edges; append LF",
+    "books": [
+      {
+        "id": "pride-prejudice",
+        "title": "Pride and Prejudice",
+        "split": "train",
+        "repository": "Pride-and-Prejudice_1342",
+        "revision": "81db45c9c48c592f0b77f01fc59e677ad0a5634e",
+        "filename": "1342-0.txt",
+        "sha256": "48e0522844402a86a3ea98f0947ba85ea54838db3c59022299298ed968a5a163",
+        "source": "https://raw.githubusercontent.com/GITenberg/Pride-and-Prejudice_1342/81db45c9c48c592f0b77f01fc59e677ad0a5634e/1342-0.txt",
+        "path": "books/pride-prejudice.txt",
+        "normalized_sha256": "64b53e6da98d9ab807d8d4ff601d66a8c1e212e4a81f778de178d5138f02555a",
+        "bytes": 691960
+      },
+      {
+        "id": "sense-sensibility",
+        "title": "Sense and Sensibility",
+        "split": "train",
+        "repository": "Sense-and-Sensibility_161",
+        "revision": "1cd7ffed1c21536f6ee2fea4d68c96e2c12ce14c",
+        "filename": "161.txt",
+        "sha256": "9109bd8aabe8f36d0814bd6f5afad1e278b1369d66c0d3846667f0659e119d27",
+        "source": "https://raw.githubusercontent.com/GITenberg/Sense-and-Sensibility_161/1cd7ffed1c21536f6ee2fea4d68c96e2c12ce14c/161.txt",
+        "path": "books/sense-sensibility.txt",
+        "normalized_sha256": "be0a01759212549f7da72084d4a2d60b5d96f03732a2d18a7de3087ea60420f6",
+        "bytes": 673880
+      },
+      {
+        "id": "emma",
+        "title": "Emma",
+        "split": "train",
+        "repository": "Emma_158",
+        "revision": "9943f6422b9246e7ad37625d6bd014b035fbfdea",
+        "filename": "158-0.txt",
+        "sha256": "89b601ce13c21eca31766bdd1a554842fc9ecb7d3638cc769f41712a523e24cf",
+        "source": "https://raw.githubusercontent.com/GITenberg/Emma_158/9943f6422b9246e7ad37625d6bd014b035fbfdea/158-0.txt",
+        "path": "books/emma.txt",
+        "normalized_sha256": "ff05e429ba985605b3f0bbbb9d4d75db86c6ab55fe804915a268e11b9e35294b",
+        "bytes": 891534
+      },
+      {
+        "id": "persuasion",
+        "title": "Persuasion",
+        "split": "validation",
+        "repository": "Persuasion_105",
+        "revision": "d408e95fc4098953e8dd8eb7cac6023802cb54f4",
+        "filename": "105.txt",
+        "sha256": "a773a0205cc090d3844408b157831a29263cc5207630c3a66b768216085ed91b",
+        "source": "https://raw.githubusercontent.com/GITenberg/Persuasion_105/d408e95fc4098953e8dd8eb7cac6023802cb54f4/105.txt",
+        "path": "books/persuasion.txt",
+        "normalized_sha256": "b14a14aa0177837bbec21ff1d04a4a1f84b0a7b74a80ff0a62ad189c7e83be96",
+        "bytes": 467010
+      },
+      {
+        "id": "northanger-abbey",
+        "title": "Northanger Abbey",
+        "split": "test",
+        "repository": "Northanger-Abbey_121",
+        "revision": "c1b554e6d17c67d26b4fbd4bcc92d7eb4f27b2e7",
+        "filename": "121-0.txt",
+        "sha256": "bbd0f21dbcd079832245a4b9990caeada34965059974a99d2990507461b8647f",
+        "source": "https://raw.githubusercontent.com/GITenberg/Northanger-Abbey_121/c1b554e6d17c67d26b4fbd4bcc92d7eb4f27b2e7/121-0.txt",
+        "path": "books/northanger-abbey.txt",
+        "normalized_sha256": "4c4bbb67692500019cc59f503205ac619a901030ca995837a1292da194e40d69",
+        "bytes": 437846
+      }
+    ],
+    "overlap_audit": [
+      {
+        "left": "pride-prejudice",
+        "right": "persuasion",
+        "shared_long_exact_paragraphs": 0
+      },
+      {
+        "left": "pride-prejudice",
+        "right": "northanger-abbey",
+        "shared_long_exact_paragraphs": 0
+      },
+      {
+        "left": "sense-sensibility",
+        "right": "persuasion",
+        "shared_long_exact_paragraphs": 0
+      },
+      {
+        "left": "sense-sensibility",
+        "right": "northanger-abbey",
+        "shared_long_exact_paragraphs": 0
+      },
+      {
+        "left": "emma",
+        "right": "persuasion",
+        "shared_long_exact_paragraphs": 0
+      },
+      {
+        "left": "emma",
+        "right": "northanger-abbey",
+        "shared_long_exact_paragraphs": 0
+      },
+      {
+        "left": "persuasion",
+        "right": "northanger-abbey",
+        "shared_long_exact_paragraphs": 0
+      }
+    ],
+    "evaluation_limit": "different works by one author; near-duplicate or stylistic overlap may remain",
+    "dataset_sha256": "fd6403e1d1d186ba495713d95dcffa583ff249911e2b28b01da56f99b1b447bc"
+  },
+  "runs": [
+    {
+      "architecture": "transformer",
+      "seed": 17,
+      "parameters": 347200,
+      "selected_step": 1200,
+      "validation": {
+        "bits_per_byte": 2.7912885963403955,
+        "loss_nats_per_byte": 1.9347738206824723,
+        "perplexity_per_byte": 6.922478156912898,
+        "targets_scored": 467009,
+        "books": [
+          {
+            "book": "persuasion",
+            "loss_nats_per_byte": 1.9347738206824723,
+            "perplexity_per_byte": 6.922478156912898,
+            "bits_per_byte": 2.7912885963403955,
+            "targets_scored": 467009
+          }
+        ]
+      },
+      "test": {
+        "bits_per_byte": 2.7455335467921684,
+        "loss_nats_per_byte": 1.903058837091738,
+        "perplexity_per_byte": 6.706376814340205,
+        "targets_scored": 437845,
+        "books": [
+          {
+            "book": "northanger-abbey",
+            "loss_nats_per_byte": 1.903058837091738,
+            "perplexity_per_byte": 6.706376814340205,
+            "bits_per_byte": 2.7455335467921684,
+            "targets_scored": 437845
+          }
+        ]
+      },
+      "context_probe": [
+        {
+          "book": "northanger-abbey",
+          "context_bytes": 8,
+          "bits_per_byte": 3.0880796545108433,
+          "targets_scored": 256,
+          "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+        },
+        {
+          "book": "northanger-abbey",
+          "context_bytes": 32,
+          "bits_per_byte": 3.0676238230389075,
+          "targets_scored": 256,
+          "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+        },
+        {
+          "book": "northanger-abbey",
+          "context_bytes": 128,
+          "bits_per_byte": 3.911148872050065,
+          "targets_scored": 256,
+          "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+        }
+      ],
+      "fixed_prompt": "It was a quiet evening, and ",
+      "sample": "It was a quiet evening, and being all that and her mom to you wen con of inter, and the him it of harreate of the won the be to o avis te t thimilureanedin t ousppios agrcinfes s ailime hblfowateted s taplif teess, s\nigane ast r",
+      "checkpoint_sha256": "37c65d0a77261351fe3a9a2b88fcbcadf558664c240bc915c89b8261a9f75795"
+    },
+    {
+      "architecture": "transformer",
+      "seed": 42,
+      "parameters": 347200,
+      "selected_step": 1200,
+      "validation": {
+        "bits_per_byte": 2.7638609475948264,
+        "loss_nats_per_byte": 1.9157624232850925,
+        "perplexity_per_byte": 6.792115290261388,
+        "targets_scored": 467009,
+        "books": [
+          {
+            "book": "persuasion",
+            "loss_nats_per_byte": 1.9157624232850925,
+            "perplexity_per_byte": 6.792115290261388,
+            "bits_per_byte": 2.7638609475948264,
+            "targets_scored": 467009
+          }
+        ]
+      },
+      "test": {
+        "bits_per_byte": 2.7161299008108557,
+        "loss_nats_per_byte": 1.8826777827816086,
+        "perplexity_per_byte": 6.571077241677664,
+        "targets_scored": 437845,
+        "books": [
+          {
+            "book": "northanger-abbey",
+            "loss_nats_per_byte": 1.8826777827816086,
+            "perplexity_per_byte": 6.571077241677664,
+            "bits_per_byte": 2.7161299008108557,
+            "targets_scored": 437845
+          }
+        ]
+      },
+      "context_probe": [
+        {
+          "book": "northanger-abbey",
+          "context_bytes": 8,
+          "bits_per_byte": 3.105650305031905,
+          "targets_scored": 256,
+          "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+        },
+        {
+          "book": "northanger-abbey",
+          "context_bytes": 32,
+          "bits_per_byte": 3.029452531653883,
+          "targets_scored": 256,
+          "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+        },
+        {
+          "book": "northanger-abbey",
+          "context_bytes": 128,
+          "bits_per_byte": 3.0964829418103137,
+          "targets_scored": 256,
+          "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+        }
+      ],
+      "fixed_prompt": "It was a quiet evening, and ",
+      "sample": "It was a quiet evening, and being all that be\nferect ireposed wer con the ot him not the simite to arrraie of the wo which\nspter livish the cartion of and on of him, and comf she a live her could\nand in prie the she persition ar",
+      "checkpoint_sha256": "dff9dd3ca18d56d91a15551dfc7032965dcac70c1315a9b0b3eea465c72654fd"
+    },
+    {
+      "architecture": "transformer",
+      "seed": 73,
+      "parameters": 347200,
+      "selected_step": 1200,
+      "validation": {
+        "bits_per_byte": 2.772591201051613,
+        "loss_nats_per_byte": 1.921813773854238,
+        "perplexity_per_byte": 6.833341371920961,
+        "targets_scored": 467009,
+        "books": [
+          {
+            "book": "persuasion",
+            "loss_nats_per_byte": 1.921813773854238,
+            "perplexity_per_byte": 6.833341371920961,
+            "bits_per_byte": 2.772591201051613,
+            "targets_scored": 467009
+          }
+        ]
+      },
+      "test": {
+        "bits_per_byte": 2.7295212821601393,
+        "loss_nats_per_byte": 1.8919599810076675,
+        "perplexity_per_byte": 6.632355240488255,
+        "targets_scored": 437845,
+        "books": [
+          {
+            "book": "northanger-abbey",
+            "loss_nats_per_byte": 1.8919599810076675,
+            "perplexity_per_byte": 6.632355240488255,
+            "bits_per_byte": 2.7295212821601393,
+            "targets_scored": 437845
+          }
+        ]
+      },
+      "context_probe": [
+        {
+          "book": "northanger-abbey",
+          "context_bytes": 8,
+          "bits_per_byte": 3.091033499535075,
+          "targets_scored": 256,
+          "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+        },
+        {
+          "book": "northanger-abbey",
+          "context_bytes": 32,
+          "bits_per_byte": 3.034773653373747,
+          "targets_scored": 256,
+          "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+        },
+        {
+          "book": "northanger-abbey",
+          "context_bytes": 128,
+          "bits_per_byte": 3.1260726428825856,
+          "targets_scored": 256,
+          "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+        }
+      ],
+      "fixed_prompt": "It was a quiet evening, and ",
+      "sample": "It was a quiet evening, and being all that and her mod to\nyou were of the othing not the simiten or withir of the wo which a to\nof his the frectiom Mars Laste, she day griable he walllf her with the\nsitablie the she persittest r",
+      "checkpoint_sha256": "7426257c5dbe2c0498d0502ad3279024a67280079174c90040f8ccc57073a476"
+    },
+    {
+      "architecture": "gru",
+      "seed": 17,
+      "parameters": 350400,
+      "selected_step": 1200,
+      "validation": {
+        "bits_per_byte": 2.5378401383624865,
+        "loss_nats_per_byte": 1.759096736617819,
+        "perplexity_per_byte": 5.807189602968724,
+        "targets_scored": 467009,
+        "books": [
+          {
+            "book": "persuasion",
+            "loss_nats_per_byte": 1.759096736617819,
+            "perplexity_per_byte": 5.807189602968724,
+            "bits_per_byte": 2.5378401383624865,
+            "targets_scored": 467009
+          }
+        ]
+      },
+      "test": {
+        "bits_per_byte": 2.511230064678577,
+        "loss_nats_per_byte": 1.7406520390693248,
+        "perplexity_per_byte": 5.701059524565084,
+        "targets_scored": 437845,
+        "books": [
+          {
+            "book": "northanger-abbey",
+            "loss_nats_per_byte": 1.7406520390693248,
+            "perplexity_per_byte": 5.701059524565084,
+            "bits_per_byte": 2.511230064678577,
+            "targets_scored": 437845
+          }
+        ]
+      },
+      "context_probe": [
+        {
+          "book": "northanger-abbey",
+          "context_bytes": 8,
+          "bits_per_byte": 2.824553368818344,
+          "targets_scored": 256,
+          "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+        },
+        {
+          "book": "northanger-abbey",
+          "context_bytes": 32,
+          "bits_per_byte": 2.8158869910587163,
+          "targets_scored": 256,
+          "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+        },
+        {
+          "book": "northanger-abbey",
+          "context_bytes": 128,
+          "bits_per_byte": 2.8158871200457045,
+          "targets_scored": 256,
+          "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+        }
+      ],
+      "fixed_prompt": "It was a quiet evening, and ",
+      "sample": "It was a quiet evening, and plise all that every comminecty of to con the other which the main of harriate of the was the dayter liver the from not Mars all be supcos agriatfes, feal were affeed the\nsiriplied a she some much tha",
+      "checkpoint_sha256": "5122ca24f6bd2da3f4c6dabc8d4c6d3604b359d8c4c18ba4f050d133c7dcb54e"
+    },
+    {
+      "architecture": "gru",
+      "seed": 42,
+      "parameters": 350400,
+      "selected_step": 1200,
+      "validation": {
+        "bits_per_byte": 2.541121792111681,
+        "loss_nats_per_byte": 1.7613714056616472,
+        "perplexity_per_byte": 5.8204140723336995,
+        "targets_scored": 467009,
+        "books": [
+          {
+            "book": "persuasion",
+            "loss_nats_per_byte": 1.7613714056616472,
+            "perplexity_per_byte": 5.8204140723336995,
+            "bits_per_byte": 2.541121792111681,
+            "targets_scored": 467009
+          }
+        ]
+      },
+      "test": {
+        "bits_per_byte": 2.4971446368319588,
+        "loss_nats_per_byte": 1.7308887644704607,
+        "perplexity_per_byte": 5.645669349655138,
+        "targets_scored": 437845,
+        "books": [
+          {
+            "book": "northanger-abbey",
+            "loss_nats_per_byte": 1.7308887644704607,
+            "perplexity_per_byte": 5.645669349655138,
+            "bits_per_byte": 2.4971446368319588,
+            "targets_scored": 437845
+          }
+        ]
+      },
+      "context_probe": [
+        {
+          "book": "northanger-abbey",
+          "context_bytes": 8,
+          "bits_per_byte": 2.7737711915848284,
+          "targets_scored": 256,
+          "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+        },
+        {
+          "book": "northanger-abbey",
+          "context_bytes": 32,
+          "bits_per_byte": 2.766797574564149,
+          "targets_scored": 256,
+          "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+        },
+        {
+          "book": "northanger-abbey",
+          "context_bytes": 128,
+          "bits_per_byte": 2.766797144607522,
+          "targets_scored": 256,
+          "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+        }
+      ],
+      "fixed_prompt": "It was a quiet evening, and ",
+      "sample": "It was a quiet evening, and plise all that and her more poon wether to geen and he would simet of hardlate of the was the dayter liver the from nom of she stongs. And agriet be she live heart his for in prie the she, in much thr",
+      "checkpoint_sha256": "380bf91208577da547f807cd00d4f2f2adb24266f564ddf3712b24fa86b792a9"
+    },
+    {
+      "architecture": "gru",
+      "seed": 73,
+      "parameters": 350400,
+      "selected_step": 1200,
+      "validation": {
+        "bits_per_byte": 2.5466585242461983,
+        "loss_nats_per_byte": 1.7652091759302033,
+        "perplexity_per_byte": 5.842794402224501,
+        "targets_scored": 467009,
+        "books": [
+          {
+            "book": "persuasion",
+            "loss_nats_per_byte": 1.7652091759302033,
+            "perplexity_per_byte": 5.842794402224501,
+            "bits_per_byte": 2.5466585242461983,
+            "targets_scored": 467009
+          }
+        ]
+      },
+      "test": {
+        "bits_per_byte": 2.507254556429665,
+        "loss_nats_per_byte": 1.7378964267352985,
+        "perplexity_per_byte": 5.68537123996473,
+        "targets_scored": 437845,
+        "books": [
+          {
+            "book": "northanger-abbey",
+            "loss_nats_per_byte": 1.7378964267352985,
+            "perplexity_per_byte": 5.68537123996473,
+            "bits_per_byte": 2.507254556429665,
+            "targets_scored": 437845
+          }
+        ]
+      },
+      "context_probe": [
+        {
+          "book": "northanger-abbey",
+          "context_bytes": 8,
+          "bits_per_byte": 2.835234114874034,
+          "targets_scored": 256,
+          "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+        },
+        {
+          "book": "northanger-abbey",
+          "context_bytes": 32,
+          "bits_per_byte": 2.828608526245207,
+          "targets_scored": 256,
+          "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+        },
+        {
+          "book": "northanger-abbey",
+          "context_bytes": 128,
+          "bits_per_byte": 2.82861016008039,
+          "targets_scored": 256,
+          "target_positions_sha256": "6bc3f236bc3a878a24de4fc5b8fd85e11560c3e46262b5e123e5302121a262ee"
+        }
+      ],
+      "fixed_prompt": "It was a quiet evening, and ",
+      "sample": "It was a quiet evening, and plise all that ever seem derected were on the othing not it him it she arriate of the was those to morn is the from nom naterially is did frime after fealing her could an\nMirible of every, in much thr",
+      "checkpoint_sha256": "a072e9162a02f33463406ff2514caee37db1332679c6fce2c0bfdad238070b87"
+    }
+  ],
+  "aggregate": [
+    {
+      "architecture": "transformer",
+      "seeds": [
+        17,
+        42,
+        73
+      ],
+      "mean_test_bpb": 2.7303949099210545,
+      "sample_std_test_bpb": 0.014721277741659293
+    },
+    {
+      "architecture": "gru",
+      "seeds": [
+        17,
+        42,
+        73
+      ],
+      "mean_test_bpb": 2.5052097526467336,
+      "sample_std_test_bpb": 0.007261937502388081
+    }
+  ],
+  "ngram_baselines": [
+    {
+      "order": 1,
+      "bits_per_byte": 4.497335346540905,
+      "perplexity_per_byte": 22.585662797736703,
+      "targets_scored": 437845,
+      "context_reset_bytes": 128
+    },
+    {
+      "order": 2,
+      "bits_per_byte": 3.490623344283344,
+      "perplexity_per_byte": 11.240414595284218,
+      "targets_scored": 437845,
+      "context_reset_bytes": 128
+    },
+    {
+      "order": 3,
+      "bits_per_byte": 2.8096725204979975,
+      "perplexity_per_byte": 7.011254094848368,
+      "targets_scored": 437845,
+      "context_reset_bytes": 128
+    },
+    {
+      "order": 4,
+      "bits_per_byte": 2.2945595096910116,
+      "perplexity_per_byte": 4.906041745003085,
+      "targets_scored": 437845,
+      "context_reset_bytes": 128
+    }
+  ],
+  "interpretation": "one independent test book by the same author; three seeds are limited evidence; lower BPB is better"
+}

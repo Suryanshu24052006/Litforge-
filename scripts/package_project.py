@@ -1,52 +1,56 @@
-"""Bundle source and completed trained models, excluding environments and raw data."""
+"""Package the runnable lab, bundled inference weights, and measured records."""
 
 import argparse
 from pathlib import Path
 from zipfile import ZIP_DEFLATED, ZipFile
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--output", type=Path, default=Path("../litforge-project.zip"))
-args = parser.parse_args()
-root = Path(__file__).resolve().parents[1]
-for run in ("cpu", "demo"):
-    if not (root / "runs" / run / "summary.json").exists():
-        parser.error(f"The {run} training run has not completed")
+from litforge.artifacts import verify_models
 
-files = [
-    root / name
-    for name in (
-        "pyproject.toml",
-        "uv.lock",
-        "README.md",
-        "DATA.md",
-        ".gitignore",
-        ".python-version",
-    )
-]
-for folder in ("litforge", "tests", "scripts", "docs", ".github"):
-    files += [
-        path
-        for path in (root / folder).rglob("*")
-        if path.is_file() and "__pycache__" not in path.parts and path.suffix != ".pyc"
-    ]
-for run in ("cpu", "demo"):
-    files += [
-        root / "runs" / run / name
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--output", type=Path, default=Path("../litforge-lab.zip"))
+    args = parser.parse_args()
+    root = Path(__file__).resolve().parents[1]
+    verify_models(root)
+    files = [
+        root / name
         for name in (
-            "best.pt",
-            "run.json",
-            "metrics.jsonl",
-            "summary.json",
-            "evaluation-test.json",
+            "pyproject.toml",
+            "uv.lock",
+            "README.md",
+            "DATA.md",
+            "LICENSE",
+            ".gitignore",
+            ".python-version",
         )
     ]
-sample = root / "runs/demo/sample-seed42.txt"
-if sample.exists():
-    files.append(sample)
-for path in files:
-    if not path.exists():
-        parser.error(f"Required artifact is missing: {path.relative_to(root)}")
-with ZipFile(args.output, "x", compression=ZIP_DEFLATED, compresslevel=6) as archive:
-    for path in sorted(files):
-        archive.write(path, Path("litforge") / path.relative_to(root))
-print(f"Saved {len(files)} files to {args.output}")
+    for folder in (
+        "litforge",
+        "tests",
+        "scripts",
+        "docs",
+        ".github",
+        "experiments",
+        "artifacts",
+        "models",
+    ):
+        files += [
+            p
+            for p in (root / folder).rglob("*")
+            if p.is_file() and "__pycache__" not in p.parts and p.suffix != ".pyc"
+        ]
+    for path in files:
+        if not path.exists():
+            parser.error(f"Required artifact is missing: {path.relative_to(root)}")
+    # Exclusive creation preserves older archives and their original model weights.
+    with ZipFile(
+        args.output, "x", compression=ZIP_DEFLATED, compresslevel=6
+    ) as archive:
+        for path in sorted(files):
+            archive.write(path, Path("litforge") / path.relative_to(root))
+    print(f"Saved {len(files)} files to {args.output}")
+
+
+if __name__ == "__main__":
+    main()

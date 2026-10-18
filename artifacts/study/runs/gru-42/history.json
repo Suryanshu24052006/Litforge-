@@ -1,0 +1,104 @@
+[
+  {
+    "step": 0,
+    "validation": {
+      "bits_per_byte": 8.162320847093275,
+      "loss_nats_per_byte": 5.6576896819883675,
+      "perplexity_per_byte": 286.4860036232122,
+      "targets_scored": 467009,
+      "books": [
+        {
+          "book": "persuasion",
+          "loss_nats_per_byte": 5.6576896819883675,
+          "perplexity_per_byte": 286.4860036232122,
+          "bits_per_byte": 8.162320847093275,
+          "targets_scored": 467009
+        }
+      ]
+    }
+  },
+  {
+    "step": 300,
+    "training_loss_nats_per_byte": 2.569028768539429,
+    "validation": {
+      "bits_per_byte": 3.008286612852456,
+      "loss_nats_per_byte": 2.0851853840149075,
+      "perplexity_per_byte": 8.046082958608576,
+      "targets_scored": 467009,
+      "books": [
+        {
+          "book": "persuasion",
+          "loss_nats_per_byte": 2.0851853840149075,
+          "perplexity_per_byte": 8.046082958608576,
+          "bits_per_byte": 3.008286612852456,
+          "targets_scored": 467009
+        }
+      ]
+    },
+    "elapsed_seconds": 37.03815488200007,
+    "trained_bytes": 614400
+  },
+  {
+    "step": 600,
+    "training_loss_nats_per_byte": 1.9169644101460774,
+    "validation": {
+      "bits_per_byte": 2.703644982804056,
+      "loss_nats_per_byte": 1.874023897065673,
+      "perplexity_per_byte": 6.514457235085092,
+      "targets_scored": 467009,
+      "books": [
+        {
+          "book": "persuasion",
+          "loss_nats_per_byte": 1.874023897065673,
+          "perplexity_per_byte": 6.514457235085092,
+          "bits_per_byte": 2.703644982804056,
+          "targets_scored": 467009
+        }
+      ]
+    },
+    "elapsed_seconds": 74.38671013800013,
+    "trained_bytes": 1228800
+  },
+  {
+    "step": 900,
+    "training_loss_nats_per_byte": 1.7547277375062307,
+    "validation": {
+      "bits_per_byte": 2.583289089992118,
+      "loss_nats_per_byte": 1.7905995492993032,
+      "perplexity_per_byte": 5.993044515110093,
+      "targets_scored": 467009,
+      "books": [
+        {
+          "book": "persuasion",
+          "loss_nats_per_byte": 1.7905995492993032,
+          "perplexity_per_byte": 5.993044515110093,
+          "bits_per_byte": 2.583289089992118,
+          "targets_scored": 467009
+        }
+      ]
+    },
+    "elapsed_seconds": 112.49212995300013,
+    "trained_bytes": 1843200
+  },
+  {
+    "step": 1200,
+    "training_loss_nats_per_byte": 1.7029521640141805,
+    "validation": {
+      "bits_per_byte": 2.541121792111681,
+      "loss_nats_per_byte": 1.7613714056616472,
+      "perplexity_per_byte": 5.8204140723336995,
+      "targets_scored": 467009,
+      "books": [
+        {
+          "book": "persuasion",
+          "loss_nats_per_byte": 1.7613714056616472,
+          "perplexity_per_byte": 5.8204140723336995,
+          "bits_per_byte": 2.541121792111681,
+          "targets_scored": 467009
+        }
+      ]
+    },
+    "elapsed_seconds": 150.12385390100007,
+    "trained_bytes": 2457600
+  }
+]
