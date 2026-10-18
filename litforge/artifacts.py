@@ -80,22 +80,19 @@ def export_study(study_directory, repository):
 def render_study_report(result, destination):
     plan = result["protocol"]
     lines = [
-        "# Whole-book generalization study",
+        "# Full results",
         "",
-        plan["question"],
+        "This page shows the full measurements behind the simple result table in the README. We checked how well small models predict a book they did not train on. The numbers come from the saved run records.",
         "",
-        "This is a small, reproducible comparison, not a claim of a new model architecture or a production writing assistant. All quantities below come from the committed run records.",
+        "**How to read the score:** lower bits per byte (BPB) means better prediction of the actual text. It is not an accuracy percentage. See the [developer guide](DEVELOPMENT.md) for formulas and technical terms.",
         "",
-        "## Protocol",
+        "## How the comparison was run",
         "",
-        f"Protocol SHA256: `{result['protocol_sha256']}`.",
-        f"Dataset SHA256: `{result['dataset']['dataset_sha256']}`.",
+        f"Each neural model receives {plan['steps'] * plan['batch_size'] * next(iter(plan['models'].values()))['context']:,} sampled training bytes per run. The random seeds are {', '.join(map(str, plan['seeds']))}. The models are almost the same size and use the same training settings. Training time and computation are not matched, and the shared settings may suit one model better than the other.",
         "",
-        f"Each neural run processes {plan['steps'] * plan['batch_size'] * next(iter(plan['models'].values()))['context']:,} training bytes. Seeds: {', '.join(map(str, plan['seeds']))}. Models have nearly equal parameter counts. Wall time and FLOPs are not matched. AdamW uses the same learning rate, schedule, batch size, and context length for both architectures; this is a fixed shared recipe rather than individually optimized hyperparameters.",
+        "Training passages stay inside one book. Text is represented as UTF-8 bytes, using 256 possible values. Gutenberg headers and footers are removed. The earlier Shakespeare experiment used different text and character-level scores, so its results cannot be compared directly with these.",
         "",
-        "Training windows never cross book boundaries. UTF-8 byte tokenization has a fixed vocabulary of 256, so held-out books cannot introduce unknown tokens. Gutenberg headers and footers are removed. These byte-level scores are not directly comparable to the original character-level Shakespeare results.",
-        "",
-        "| Split | Book | Normalized bytes |",
+        "| Job | Book | Cleaned bytes |",
         "|---|---|---:|",
     ]
     for book in result["dataset"]["books"]:
@@ -107,15 +104,15 @@ def render_study_report(result, destination):
         "",
         f"The audit found {overlaps} exact shared paragraphs of at least 100 whitespace-normalized characters across splits. This does not rule out shorter repeated phrases, paraphrases, or shared style.",
         "",
-        "Checkpoints are selected only on full-book validation BPB. All preregistered runs must finish before the runner scores the test book. The demo seed is declared in the protocol and is not selected from test results.",
+        "The validation book chooses which saved model to keep. The test book is scored only after every planned training run finishes. The seed used for the demo was chosen in the plan, before looking at test scores.",
         "",
         "![Validation curves with seed variation](study-learning.svg)",
         "",
-        "## Held-out book results",
+        "## Results on the unseen test book",
         "",
-        "Lower bits per byte (BPB) is better. Standard deviation is the sample SD across training seeds, not a confidence interval. Three seeds give limited precision.",
+        f"The table reports each model’s average across {len(plan['seeds'])} training runs. Sample SD means standard deviation: how much the score varies between runs. It is not a confidence interval, and a small number of runs gives limited evidence.",
         "",
-        "| Architecture | Parameters | Seeds | Mean test BPB | Sample SD |",
+        "| Model | Parameters | Training runs | Average test BPB | Sample SD |",
         "|---|---:|---:|---:|---:|",
     ]
     for row in result["aggregate"]:
@@ -139,17 +136,17 @@ def render_study_report(result, destination):
     ]
     for row in result["ngram_baselines"]:
         lines.append(
-            f"| Interpolated order {row['order']} | {row['bits_per_byte']:.4f} | {row['targets_scored']:,} |"
+            f"| {row['order']}-gram | {row['bits_per_byte']:.4f} | {row['targets_scored']:,} |"
         )
     lines += [
         "",
-        "N-gram probabilities use train-only counts, fixed interpolation and smoothing from the protocol, and the same evaluation-window boundaries as the neural models. Baselines fit all available training text; their exposure and compute are not matched to the neural optimization budget.",
+        "The n-gram methods count short patterns using only training text. The plan fixes how counts are combined and adjusted to avoid zero probabilities. They use the same evaluation boundaries as the neural models, but count all training text directly. Their learning process, data exposure, and computation differ from neural training.",
         "",
-        "## Context diagnostic",
+        "## Does giving the model more text help?",
         "",
-        "These scores use the same sampled target positions at every context length. They are a diagnostic, separate from the complete-book score above. Each run records the target-position digest and sample count.",
+        "This extra check predicts the same selected bytes using different amounts of earlier text. It samples positions rather than scoring the complete book, so these numbers are separate from the main results. Each run records which positions were used.",
         "",
-        "| Architecture | Available context (bytes) | Mean diagnostic BPB |",
+        "| Model | Earlier input (bytes) | Average score (BPB) |",
         "|---|---:|---:|",
     ]
     for architecture in plan["models"]:
@@ -167,25 +164,25 @@ def render_study_report(result, destination):
     best = min(result["aggregate"], key=lambda r: r["mean_test_bpb"])
     ngram = min(result["ngram_baselines"], key=lambda row: row["bits_per_byte"])
     verdict = (
-        f"The order-{ngram['order']} baseline scores lower than both neural architecture means under this budget."
+        f"The {ngram['order']}-gram comparison method scores better than the average of each neural model at this training budget."
         if ngram["bits_per_byte"] < min(r["mean_test_bpb"] for r in result["aggregate"])
-        else "At least one neural architecture mean improves on the strongest n-gram baseline."
+        else "At least one neural model averages a better score than the strongest n-gram comparison method."
     )
     lines += [
         "",
-        f"Shortening the input also resets the Transformer’s learned positional indices. These probes do not isolate semantic context use from positional sensitivity. A nonmonotonic curve is possible; {plan['context_probe']['anchors']} requested targets and {len(plan['seeds'])} seeds give limited evidence for a general claim that more context helps.",
+        f"Shortening the input also changes the position numbers used by the Transformer. This mixes two effects: how much text it sees and how it uses positions. With {plan['context_probe']['anchors']} requested target positions and {len(plan['seeds'])} seeds, this check cannot prove that more context always helps.",
         "",
         "![Full-book scores and context diagnostic](study-comparison.svg)",
         "",
-        "## What the experiment supports",
+        "## What can we conclude?",
         "",
-        f"{best['architecture'].upper()} has the lower mean neural test BPB in this study. {verdict} This is a result for this dataset, recipe, and budget; it is not a universal architecture ranking.",
+        f"{best['architecture'].upper()} has the best average test score among the neural models. {verdict} This result applies to these books, settings, and training budget. It does not tell us which method is always best.",
         "",
-        "Whole-book separation is stronger than a random or contiguous within-book split, but the final test contains only one work by one author. No claims about other authors, conversational ability, or human writing quality follow from these scores. More seeds, individually tuned recipes, different test works, and larger budgets are separate experiments.",
+        "Using separate books gives a stronger test than splitting one book into sections. The final test still covers only one book by one author. These scores do not establish performance on other authors, conversation, or human writing quality. More books, more seeds, and different training budgets would be follow-up experiments.",
         "",
-        "## Fixed-prompt samples",
+        "## Real model output",
         "",
-        "The following use the preregistered demo seed, identical prompt, generation seed 42, temperature 0.8, and top-k 20. No sample was selected for fluency.",
+        "Both models receive the same opening. These samples use the demo seed declared in the plan, sampling seed 42, temperature 0.8, and top-k 20. They were not chosen for how good they sound; invented words and awkward sentences are part of the result.",
         "",
     ]
     for architecture in plan["models"]:
@@ -196,7 +193,7 @@ def render_study_report(result, destination):
         )
         lines += [f"### {architecture}", "", "```text", run["sample"], "```", ""]
     lines += [
-        "## Reproduce",
+        "## Run the experiment yourself",
         "",
         "```bash",
         "uv sync --frozen --extra dev",
@@ -204,7 +201,17 @@ def render_study_report(result, destination):
         "uv run --frozen python -m litforge study --output runs/reproduced-study",
         "```",
         "",
-        "The protocol, source digests, environment versions, per-seed histories, and evaluations are committed under `artifacts/study/`. Full optimizer/RNG checkpoints stay under ignored `runs/`; small inference weights are bundled under `models/`.",
+        "The experiment plan, file fingerprints, software versions, and individual training records are saved under `artifacts/study/`. Full training states stay in the local `runs/` directory; the small models used by the app are included under `models/`.",
+        "",
+        "<details>",
+        "<summary>Exact experiment and data fingerprints</summary>",
+        "",
+        f"Original experiment question: {plan['question']}",
+        "",
+        f"Protocol SHA256: `{result['protocol_sha256']}`.",
+        f"Dataset SHA256: `{result['dataset']['dataset_sha256']}`.",
+        "",
+        "</details>",
         "",
     ]
     destination = Path(destination)

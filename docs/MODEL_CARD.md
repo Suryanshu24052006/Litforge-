@@ -1,40 +1,53 @@
-# LitForge novel model card
+# About the models
 
-## Task and artifacts
+## What do they do?
 
-Two small, randomly initialized autoregressive models predict the next UTF-8 byte in English literary text. They continue a prompt; they have no instruction tuning, retrieval, pretrained knowledge, or external inference service.
+LitForge includes two small models: a **Transformer** and a **GRU**. Both try to continue an opening passage by predicting the next byte of text. They were trained from random starting weights, rather than downloaded as pretrained models.
 
-| Artifact | Architecture | Parameters | Context | Training seed |
-|---|---|---:|---:|---:|
-| `models/novel-transformer.pt` | 2 pre-norm decoder blocks, width 112, 4 heads | 347,200 | 128 bytes | 42 |
-| `models/novel-gru.pt` | 2-layer PyTorch GRU, width 160 | 350,400 | 128 bytes | 42 |
+They are useful for learning about text generation, comparing models, and exploring predictions in the app. They do not reliably answer questions or follow instructions.
 
-Both use 256 byte IDs, tied input/output embeddings, and float32 CPU inference. The Transformer has learned absolute positions, GELU feed-forward layers, causal attention, and residual connections. The GRU has recurrent hidden state and a final layer norm. Checkpoints have no optimizer state. Verify their sizes, hashes, selection steps, and scores in [the registry](../models/registry.json).
+| Model | Size | Included file |
+|---|---:|---|
+| Transformer | 347,200 learned parameters | `models/novel-transformer.pt` |
+| GRU | 350,400 learned parameters | `models/novel-gru.pt` |
 
-## Training and selection
+A parameter is a number adjusted during training. Both models can use up to **128 bytes of recent input**. A byte often holds one basic English character, but some characters need several bytes.
 
-Three Austen books supply 2,257,374 normalized training bytes. Each run processes 2,457,600 bytes sampled with replacement in within-book windows: 1,200 updates × 16 windows × 128 bytes. AdamW uses matrix weight decay 0.1, vector weight decay 0, peak learning rate 0.001, warmup/cosine schedule, dropout 0.1, and gradient clipping at norm 1.
+## How were they trained?
 
-Whole-book *Persuasion* validation selects checkpoints. The seed used for the bundled demo (42) was declared in the protocol, rather than selected from test scores. The architecture comparison uses all three seeds. [Full protocol](../experiments/novels.json) and [per-run identities](../artifacts/study/runs/) include software and source digests. Exact training resumption is supported by full states in ignored `runs/`; it cannot resume from an inference-only bundled checkpoint.
+Both learned from *Pride and Prejudice*, *Sense and Sensibility*, and *Emma*. *Persuasion* was used to choose which saved version to keep. *Northanger Abbey* was kept for the final test.
 
-## Evaluation
+Each model was trained three times with different random seeds. Each run received the same amount of sampled training text. The two files included in the app use seed 42, chosen in the experiment plan before looking at test scores.
 
-*Northanger Abbey* is held out as a complete book, with 437,845 next-byte targets. Evaluation resets at book boundaries and nonoverlapping 128-byte windows. Every target except the first byte of each book is scored exactly once; available context varies within a window.
+The included files are ready for generation. They do not contain all the extra state needed to resume training; full training states stay in the local `runs/` directory.
 
-Across three seeds, Transformer test BPB is 2.7304 ± 0.0147 and GRU BPB is 2.5052 ± 0.0073 (sample SD). The train-only interpolated 4-gram baseline is stronger at 2.2946 BPB. This baseline sees all training text but has a different fitting algorithm and compute budget. The [study](STUDY.md) includes all baselines, sample outputs, and the context diagnostic. The registry records the individual bundled seed's score, which differs from the three-seed mean.
+## How well did they work?
 
-The context probe scores the same 256 target positions with different prefix lengths. Resetting learned position indices makes this a diagnostic of the combined model behavior, not a clean isolation of semantic long-range context. Attention maps show mixing weights, not causal explanations.
+Across three runs, the Transformer averaged **2.7304 BPB** and the GRU averaged **2.5052 BPB**. The simple 4-gram comparison method scored **2.2946 BPB**, better than both. Lower BPB means better prediction of the actual test text; it is not an accuracy percentage.
 
-## Intended use and limits
+The [full results](STUDY.md) show variation between runs and real output samples. The [model registry](../models/registry.json) lists file checksums and the individual included models' scores. Those individual scores differ from the three-run averages.
 
-Use these models for studying training, evaluation, architecture tradeoffs, sampling, and local inspection. They produce malformed words, incoherent sentences, and repeated or copied phrases. Invalid generated UTF-8 is decoded with replacement characters. They accept Unicode prompts through byte encoding, but English-only training does not imply multilingual competence.
+## What should I keep in mind?
 
-One author, one final test work, and three seeds limit generalization claims. Exact-paragraph deduplication does not exclude short repeated phrases or paraphrases. Hyperparameters are shared, not tuned individually per architecture. The results do not measure factuality, reasoning, conversational ability, or human writing quality. Historical literary data can contain offensive language and stereotypes.
+The output can contain invented words, repetition, copied phrases, and awkward sentences. Generated bytes can also form invalid text, displayed as replacement characters. Accepting a Unicode prompt does not mean the models learned other languages.
 
-The app binds to localhost by default, serializes inference, and limits prompt/output sizes. It has no accounts, durable session storage, or production serving guarantees. CPU behavior was tested; CUDA has not been validated for the study.
+The books are all by one author, and the final test is one book. Training time and computation were not matched, and the shared settings may suit one model better than the other. Historical language and stereotypes in the books can appear in output.
 
-## Reproduction and provenance
+The attention picture shows how one head mixes information; it is not a full explanation of a decision. The extra context experiment changes input length and learned position IDs together, so it cannot prove that more context leads to better understanding.
 
-See [README](../README.md) for commands, [DATA.md](../DATA.md) for book sources, and [REFERENCES.md](REFERENCES.md) for established methods and implementation references. Models were trained from random weights with the experiment code committed at `ae9641938e9236b5fffd754142c998b1de245ad6`; file digests in each run identify that exact implementation. Later changes repair final-summary crash recovery and reject mislabeled checkpoints; they do not change the optimization recipe or recorded weights. To resume an original local training state, use its recorded source revision; new studies record the current code identity.
+The app runs locally, handles one inference request at a time, and has no user accounts or production serving guarantees. CPU behavior was tested; GPU training has not been validated for this study.
 
-The older character-level Shakespeare model is a separate experiment with [legacy results](RESULTS.md). Its vocabulary, data, score units, and checkpoint format differ.
+<details>
+<summary>Exact model and training settings</summary>
+
+Both models use a vocabulary of 256 UTF-8 byte values, tied input/output embeddings, and float32 CPU computation. The Transformer has two pre-norm decoder blocks, width 112, four attention heads, learned absolute positions, causal attention, residual connections, and GELU feed-forward layers. The GRU uses PyTorch's two-layer `nn.GRU`, width 160, and a final layer norm.
+
+The training books contain 2,257,374 normalized bytes. Each run processes 2,457,600 sampled bytes: 1,200 updates × 16 windows × 128 bytes. AdamW uses matrix weight decay 0.1, vector weight decay 0, peak learning rate 0.001, warmup/cosine decay, dropout 0.1, and gradient clipping at norm 1.
+
+Full-book evaluation scores 437,845 next-byte targets once each, resetting at book boundaries and nonoverlapping 128-byte windows. Transformer sample SD across seeds is 0.0147 BPB; GRU sample SD is 0.0073 BPB. These are standard deviations, not confidence intervals. N-grams count all training text directly, with different exposure and computation from neural optimization.
+
+The [plan](../experiments/novels.json) and [run records](../artifacts/study/runs/) contain exact settings, software versions, and source fingerprints. Models were trained using commit `ae9641938e9236b5fffd754142c998b1de245ad6`. Later fixes recover a missing final summary and reject mislabeled checkpoints; they do not change the recorded weights or training recipe. Original local training states require their recorded source revision to resume.
+
+</details>
+
+See the [developer guide](DEVELOPMENT.md) for commands, [data page](../DATA.md) for sources, and [references](REFERENCES.md) for established methods. The [older Shakespeare results](RESULTS.md) are a separate experiment using different data and units.
